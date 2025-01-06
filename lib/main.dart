@@ -5,6 +5,7 @@ import 'package:ka_inventory/hive/userData.dart';
 import 'package:ka_inventory/pages/inventory.dart';
 import 'package:ka_inventory/pages/login.dart';
 import 'package:ka_inventory/pages/menu.dart';
+import 'package:ka_inventory/pages/order.dart';
 import 'package:ka_inventory/pages/register.dart';
 import 'package:ka_inventory/pages/sales.dart';
 
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
         '/sales': (context) => const Sales(),
         '/inventory': (context) => const Inventory(),
         '/menu': (context) => const Menu(),
+        '/order': (context) => const Order(),
       },
     );
   }

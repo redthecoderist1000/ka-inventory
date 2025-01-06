@@ -1,6 +1,7 @@
 // import 'dart:math';
 
 import 'dart:convert';
+// import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class Inventory extends StatefulWidget {
 
 class _InventoryState extends State<Inventory> {
   String base64Image = '';
+  int test = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +29,7 @@ class _InventoryState extends State<Inventory> {
     int prepCount = userDataBox.get(userKey)!.prepList.length;
 
     return Scaffold(
-      appBar: const Appbar(
+      appBar: Appbar(
         title: 'Inventory',
         leading: true,
       ),
@@ -35,41 +37,52 @@ class _InventoryState extends State<Inventory> {
         child: ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             itemCount: inventoryList.length,
-            itemBuilder: (context, index) => Slidable(
-                  endActionPane: ActionPane(
-                    motion: DrawerMotion(),
-                    children: [
-                      SlidableAction(
-                        onPressed: (context) {
-                          // edit inventory
-                          if (inventoryList[index]['category'] ==
-                              'Prepared Food') {
-                            userDataBox.get(userKey)!.prepList.removeAt(index);
-                          } else {
-                            userDataBox
-                                .get(userKey)!
-                                .merchList
-                                .removeAt(index - prepCount);
-                          }
+            itemBuilder: (context, index) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Slidable(
+                    endActionPane: ActionPane(
+                      motion: DrawerMotion(),
+                      children: [
+                        SlidableAction(
+                          onPressed: (context) {
+                            // edit inventory
+                            if (inventoryList[index]['category'] ==
+                                'Prepared Food') {
+                              userDataBox
+                                  .get(userKey)!
+                                  .prepList
+                                  .removeAt(index);
+                            } else {
+                              userDataBox
+                                  .get(userKey)!
+                                  .merchList
+                                  .removeAt(index - prepCount);
+                            }
 
-                          setState(() {
-                            // Save the updated data back to Hive
-                            userDataBox.put(userKey, userDataBox.get(userKey));
-                          });
-                        },
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                        icon: Icons.delete,
-                        label: 'Delete',
+                            setState(() {
+                              // Save the updated data back to Hive
+                              userDataBox.put(
+                                  userKey, userDataBox.get(userKey));
+                            });
+                          },
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          icon: Icons.delete,
+                          label: 'Delete',
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ],
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                    ],
-                  ),
-                  child: Card(
-                    child: ListTile(
-                      title: Text(inventoryList[index]['label']),
-                      subtitle: Text(
-                          'Quantity: ${inventoryList[index]['quantity']} ${inventoryList[index]['unit']}'),
+                      child: ListTile(
+                        title: Text(inventoryList[index]['label']),
+                        subtitle: Text(
+                            'Quantity: ${inventoryList[index]['quantity']} ${inventoryList[index]['unit']}'),
+                      ),
                     ),
                   ),
                 )),
@@ -80,7 +93,7 @@ class _InventoryState extends State<Inventory> {
           borderRadius: BorderRadius.circular(360),
         ),
         onPressed: () {
-          addInventory();
+          addInventory(base64Image);
         },
         child: const Icon(
           Icons.add,
@@ -90,7 +103,7 @@ class _InventoryState extends State<Inventory> {
     );
   }
 
-  void addInventory() {
+  void addInventory(String base64Image) {
     List<DropdownMenuItem<dynamic>> itemCat = [
       DropdownMenuItem(
         value: 'Prepared Food',
@@ -237,6 +250,7 @@ class _InventoryState extends State<Inventory> {
                                     height: 30,
                                     color: Colors.blueGrey,
                                     onPressed: () async {
+                                      // pickImage();
                                       base64Image = await pickImage();
                                       setState(() {});
                                     },
@@ -289,6 +303,9 @@ class _InventoryState extends State<Inventory> {
                 MaterialButton(
                   onPressed: () {
                     base64Image = '';
+                    setState(() {
+                      test++;
+                    });
                     Navigator.pop(context);
                   },
                   color: Colors.red,
@@ -307,8 +324,8 @@ class _InventoryState extends State<Inventory> {
                         userDataBox.get(userKey)!.prepList.add({
                           'label': nameCon.text,
                           'category': cat,
-                          'sellPrice': int.parse(sellPriceCon.text),
-                          'cost': int.parse(costCon.text),
+                          'sellPrice': double.parse(sellPriceCon.text),
+                          'cost': double.parse(costCon.text),
                           'quantity': int.parse(quanCon.text),
                           'unit': unit,
                           'image': base64Image,
@@ -317,8 +334,8 @@ class _InventoryState extends State<Inventory> {
                         userDataBox.get(userKey)!.merchList.add({
                           'label': nameCon.text,
                           'category': cat,
-                          'sellPrice': int.parse(sellPriceCon.text),
-                          'cost': int.parse(costCon.text),
+                          'sellPrice': double.parse(sellPriceCon.text),
+                          'cost': double.parse(costCon.text),
                           'quantity': int.parse(quanCon.text),
                           'unit': unit,
                           'image': base64Image,
@@ -327,7 +344,7 @@ class _InventoryState extends State<Inventory> {
                       setState(() {
                         // Save the updated data back to Hive
                         userDataBox.put(userKey, userDataBox.get(userKey));
-                        // base64Image = '';
+                        base64Image = '';
                       });
 
                       Navigator.pop(context);

@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:ka_inventory/hive/boxes.dart';
 
 class Appbar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool leading;
   final PreferredSizeWidget? bottom;
+  final String? cart;
 
   const Appbar(
-      {super.key, required this.title, required this.leading, this.bottom});
+      {super.key,
+      required this.title,
+      required this.leading,
+      this.bottom,
+      this.cart});
 
   @override
   Widget build(BuildContext context) {
@@ -36,34 +42,39 @@ class Appbar extends StatelessWidget implements PreferredSizeWidget {
       ),
       centerTitle: true,
       backgroundColor: Colors.blueGrey[700],
-      // actions: [
-      //   IconButton(
-      //     onPressed: () {
-      //       // showDialog(
-      //       //   context: context,
-      //       //   builder: (BuildContext context) {
-      //       //     return AlertDialog(
-      //       //       title: const Text('Information'),
-      //       //       content: const Text('This is a popup dialog.'),
-      //       //       actions: <Widget>[
-      //       //         TextButton(
-      //       //           child: const Text('Close'),
-      //       //           onPressed: () {
-      //       //             Navigator.of(context).pop();
-      //       //           },
-      //       //         ),
-      //       //       ],
-      //       //     );
-      //       //   },
-      //       // );
-      //     },
-      //     icon: const Icon(
-      //       Icons.settings_rounded,
-      //       color: Colors.white,
-      //       size: 20,
-      //     ),
-      //   ),
-      // ],
+      actions: [
+        cart != null
+            ? Stack(children: [
+                IconButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/order');
+                    // print('order');
+                  },
+                  icon: const Icon(
+                    Icons.shopping_cart_outlined,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                cart != '0'
+                    ? Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: Colors.red[900],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          cart!,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
+                      )
+                    : SizedBox()
+              ])
+            : const SizedBox(),
+      ],
     );
   }
 
