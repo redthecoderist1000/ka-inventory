@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ka_inventory/hive/boxes.dart';
 
 class Appbar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -30,7 +29,7 @@ class Appbar extends StatelessWidget implements PreferredSizeWidget {
               },
               icon: const Icon(
                 Icons.chevron_left_rounded,
-                color: Colors.white,
+                color: Color(0xFFFFFFFF),
                 size: 30,
               ),
             )
@@ -41,7 +40,7 @@ class Appbar extends StatelessWidget implements PreferredSizeWidget {
             color: Colors.white, fontWeight: FontWeight.bold, fontSize: 30),
       ),
       centerTitle: true,
-      backgroundColor: Colors.blueGrey[700],
+      backgroundColor: const Color(0xFF455A64),
       actions: [
         cart != null
             ? Stack(children: [

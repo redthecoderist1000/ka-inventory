@@ -2,7 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:ka_inventory/components/appBar.dart';
+import 'package:ka_inventory/components/prepMerchTab.dart';
+import 'package:ka_inventory/components/salestile.dart';
 import 'package:ka_inventory/hive/boxes.dart';
 
 class Sales extends StatefulWidget {
@@ -15,168 +18,139 @@ class Sales extends StatefulWidget {
 class _SalesState extends State<Sales> {
   @override
   Widget build(BuildContext context) {
-    var prep_items = userDataBox.get(userKey)!.prepList;
-    var merch_items = userDataBox.get(userKey)!.merchList;
-    String orderCount = order.length.toString();
+    return ValueListenableBuilder(
+      valueListenable: userDataBox.listenable(keys: [userKey]),
+      builder: (context, box, child) {
+        String orderCount = box.get(userKey)!.orderList.length.toString();
 
-    return Scaffold(
-        // backgroundColor: Colors.blueGrey[100],
-        appBar: Appbar(
-          title: 'Sales',
-          leading: true,
-          cart: orderCount,
-        ),
-        body: DefaultTabController(
-          length: 2,
-          child: Scaffold(
-            appBar: TabBar(
-              unselectedLabelColor: Colors.blueGrey[300],
-              tabs: const [
-                Tab(
-                  child: Text(
-                    'Prepared Food',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                  ),
-                ),
-                Tab(
-                  child: Text(
-                    'Merchandise',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                  ),
-                ),
-              ],
+        return Scaffold(
+            appBar: Appbar(
+              title: 'Sales',
+              leading: true,
+              cart: orderCount,
             ),
-            body: TabBarView(
-              children: [
-                // prepared food tab
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                  child: GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                    ),
-                    itemCount: prep_items.length,
-                    itemBuilder: (context, index) {
-                      final item = prep_items[index];
-
-                      return GestureDetector(
-                        onTap: () {
-                          addToOrder(index, item['image'], item['label'],
-                              item['sellPrice'], item['cost']);
-                        },
-                        child: Card(
-                          clipBehavior: Clip.antiAlias,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                  flex: 3,
-                                  child: item['image'] == ''
-                                      ? Image.asset(
-                                          'assets/img/logo.png',
-                                          fit: BoxFit.cover,
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                        )
-                                      : Image.memory(
-                                          base64Decode(item['image']),
-                                          fit: BoxFit.cover,
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                        )),
-                              const SizedBox(height: 10),
-                              Expanded(
-                                flex: 1,
-                                child: Text(
-                                  item['label'],
-                                  style: TextStyle(
-                                      color: Colors.blueGrey[900],
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15),
-                                ),
-                              )
-                            ],
+            body: DefaultTabController(
+              length: 2,
+              child: Column(children: [
+                Prepmerchtab(),
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      // prepared food tab
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                        child: GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
                           ),
+                          itemCount: box.get(userKey)!.prepList.length,
+                          itemBuilder: (context, index) {
+                            final item = box.get(userKey)!.prepList[index];
+
+                            return Salestile(
+                              name: item['name'],
+                              image: item['image'],
+                              onTap: () {
+                                addToOrder(
+                                    index,
+                                    item['pid'],
+                                    item['image'],
+                                    item['name'],
+                                    item['sellPrice'],
+                                    item['totalCost'],
+                                    false);
+                              },
+                            );
+                          },
                         ),
-                      );
-                    },
+                      ),
+                      // merchandise tab
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                        child: GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                          ),
+                          // itemCount: box.get(userKey)!.merchList.length,
+                          itemCount: box
+                              .get(userKey)!
+                              .merchList
+                              .where(
+                                  (item) => item['quantity'] > 0 ? true : false)
+                              .length,
+                          itemBuilder: (context, index) {
+                            // final item = box.get(userKey)!.merchList[index];
+                            final filteredMerchList = box
+                                .get(userKey)!
+                                .merchList
+                                .where((item) =>
+                                    item['quantity'] > 0 ? true : false)
+                                .toList();
+                            final item = filteredMerchList[index];
+
+                            final filtered_index =
+                                box.get(userKey)!.merchList.indexOf(item);
+
+                            return Salestile(
+                                name: item['name'],
+                                image: item['image'],
+                                onTap: () {
+                                  addToOrder(
+                                      filtered_index,
+                                      item['mid'],
+                                      item['image'],
+                                      item['name'],
+                                      item['sellPrice'],
+                                      item['cost'],
+                                      true);
+                                });
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                // merchandise tab
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                  child: GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                    ),
-                    itemCount: merch_items.length,
-                    itemBuilder: (context, index) {
-                      final item = merch_items[index];
-
-                      return GestureDetector(
-                        onTap: () {
-                          addToOrder(index, item['image'], item['label'],
-                              item['sellPrice'], item['cost']);
-                        },
-                        child: Card(
-                          clipBehavior: Clip.antiAlias,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // const Icon(
-                              //   Icons.fastfood_rounded,
-                              //   size: 40,
-                              //   color: Colors.blueGrey,
-                              // ),
-                              // const SizedBox(height: 10),
-                              Expanded(
-                                  flex: 3,
-                                  child: item['image'] == ''
-                                      ? Image.asset(
-                                          'assets/img/logo.png',
-                                          fit: BoxFit.cover,
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                        )
-                                      : Image.memory(
-                                          fit: BoxFit.cover,
-                                          base64Decode(item['image']),
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                        )),
-
-                              const SizedBox(height: 10),
-
-                              Expanded(
-                                flex: 1,
-                                child: Text(
-                                  item['label'],
-                                  style: TextStyle(
-                                      color: Colors.blueGrey[900],
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                SizedBox(
+                  height: 70,
                 ),
-              ],
+              ]),
             ),
-          ),
-        ));
+            bottomSheet: Container(
+              padding: EdgeInsets.all(10),
+              height: 70,
+              width: double.infinity,
+              color: Colors.transparent,
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(Colors.blueGrey),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/summary');
+                },
+                child: Text(
+                  'Summary',
+                  style: TextStyle(color: Colors.white, fontSize: 20),
+                ),
+              ),
+            ));
+      },
+    );
   }
 
-  addToOrder(int index, String image, String label, double price, double cost) {
+  addToOrder(int index, String id, String image, String name, double price,
+      double cost, bool isMerch) {
     var quantityController = TextEditingController();
     var formKey = GlobalKey<FormState>();
 
@@ -189,7 +163,7 @@ class _SalesState extends State<Sales> {
             backgroundColor: Colors.white,
             actionsAlignment: MainAxisAlignment.center,
             title: Text(
-              label,
+              name,
               textAlign: TextAlign.center,
             ),
             titleTextStyle: TextStyle(
@@ -240,6 +214,12 @@ class _SalesState extends State<Sales> {
                       validator: (value) {
                         if (int.parse(value!) <= 0) {
                           return 'Quantity cannot be lower than 0';
+                        }
+                        if (isMerch &&
+                            int.parse(value) >
+                                userDataBox.get(userKey)!.merchList[index]
+                                    ['quantity']) {
+                          return 'Maximum quantity reached. Items left in stock: ${userDataBox.get(userKey)!.merchList[index]['quantity']}';
                         }
                         return null;
                       },
@@ -317,32 +297,36 @@ class _SalesState extends State<Sales> {
                 onPressed: () {
                   if (formKey.currentState!.validate()) {
                     bool itemExists = false;
+                    List order = userDataBox.get(userKey)!.orderList;
 
                     for (var item in order) {
-                      if (item['label'] == label) {
-                        // existing
-                        setState(() {
-                          item['quantity'] +=
-                              int.parse(quantityController.text);
-                          item['price'] += price;
-                        });
+                      if (item['name'] == name) {
+                        item['quantity'] += int.parse(quantityController.text);
+                        // item['price'] += price;
                         itemExists = true;
+
+                        userDataBox.get(userKey)!.orderList = order;
+                        userDataBox.put(userKey, userDataBox.get(userKey));
+
                         break;
                       }
                     }
 
                     if (!itemExists) {
-                      setState(() {
-                        order.add({
-                          'image': image,
-                          'label': label,
-                          'price': price,
-                          'cost': cost,
-                          'quantity': int.parse(quantityController.text),
-                        });
+                      userDataBox.get(userKey)!.orderList.add({
+                        'id': id,
+                        'image': image,
+                        'name': name,
+                        'price': price, // Ensure price is not null
+                        'cost': cost,
+                        'isMerch': isMerch,
+                        'quantity': int.parse(quantityController.text),
                       });
+                      userDataBox.get(userKey)!.orderList = order;
+                      userDataBox.put(userKey, userDataBox.get(userKey));
                     }
 
+                    // userDataBox.get(userKey)!.orderList = order;
                     Navigator.pop(context);
                   }
                 },

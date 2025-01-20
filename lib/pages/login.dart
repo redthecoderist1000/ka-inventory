@@ -1,8 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:ka_inventory/components/inputText.dart';
-import 'package:ka_inventory/hive/boxes.dart';
-import 'package:ka_inventory/hive/userData.dart';
+import 'package:ka_inventory/components/login/loginForm.dart';
+import 'package:ka_inventory/components/login/registerForm.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,91 +11,53 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
+  bool isLogin = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Login',
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 30),
-              InputText(
-                controller: _usernameController,
-                label: 'username',
+      backgroundColor: Colors.blueGrey[50],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(height: 100),
+            Image.asset('assets/img/logo.png', height: 250),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                child: Column(
+                  children: [
+                    isLogin ? Loginform() : Registerform(),
+                    RichText(
+                        text: TextSpan(
+                            text: isLogin
+                                ? 'Don\'t have an account? '
+                                : 'Already have an account? ',
+                            style: const TextStyle(
+                                color: Colors.grey, fontSize: 10),
+                            children: <TextSpan>[
+                          TextSpan(
+                              text: isLogin ? 'Register here' : 'Login here',
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  setState(() {
+                                    isLogin = !isLogin;
+                                  });
+                                },
+                              style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Color(0xff48545C),
+                                  decoration: TextDecoration.underline))
+                        ]))
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
-              InputText(
-                controller: _passwordController,
-                label: 'password',
-                isPassword: true,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // Handle registration logic here
-
-                      // check if user exists
-                      if (userDataBox.get(_usernameController.text) != null) {
-                        UserData userData =
-                            userDataBox.get(_usernameController.text);
-
-                        // check password
-                        if (userData.password == _passwordController.text) {
-                          userKey = _usernameController.text;
-                          Navigator.pushNamed(context, '/menu');
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Password does not match')));
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('User not found')));
-                      }
-                    }
-                  },
-                  style: const ButtonStyle(
-                      elevation: WidgetStatePropertyAll(0),
-                      backgroundColor:
-                          WidgetStatePropertyAll(Color(0xff48545C)),
-                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(10))))),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(color: Colors.white),
-                  )),
-              const SizedBox(
-                height: 16,
-              ),
-              RichText(
-                  text: TextSpan(
-                      text: 'Don\'t have an account? ',
-                      style: const TextStyle(color: Colors.grey, fontSize: 10),
-                      children: <TextSpan>[
-                    TextSpan(
-                        text: 'Register here',
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            Navigator.pushNamed(context, '/register');
-                          },
-                        style: const TextStyle(
-                            fontSize: 10,
-                            color: Color(0xff48545C),
-                            decoration: TextDecoration.underline))
-                  ]))
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

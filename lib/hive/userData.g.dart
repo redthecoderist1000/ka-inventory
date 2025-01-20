@@ -21,13 +21,16 @@ class UserDataAdapter extends TypeAdapter<UserData> {
       password: fields[1] as String,
       prepList: fields[2] == null ? [] : (fields[2] as List).cast<dynamic>(),
       merchList: fields[3] == null ? [] : (fields[3] as List).cast<dynamic>(),
+      orderList: fields[4] == null ? [] : (fields[4] as List).cast<dynamic>(),
+      transactionList:
+          fields[5] == null ? [] : (fields[5] as List).cast<dynamic>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, UserData obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.uname)
       ..writeByte(1)
@@ -35,7 +38,11 @@ class UserDataAdapter extends TypeAdapter<UserData> {
       ..writeByte(2)
       ..write(obj.prepList)
       ..writeByte(3)
-      ..write(obj.merchList);
+      ..write(obj.merchList)
+      ..writeByte(4)
+      ..write(obj.orderList)
+      ..writeByte(5)
+      ..write(obj.transactionList);
   }
 
   @override
