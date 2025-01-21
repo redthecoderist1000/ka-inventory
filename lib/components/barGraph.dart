@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class Bargraph extends StatelessWidget {
   final List dataList;
@@ -8,6 +9,8 @@ class Bargraph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    NumberFormat numFormat = NumberFormat("#,##0", "en_PH");
+
     double highestSaleRaw = dataList
         .map((e) => e['sales'])
         .reduce((value, element) => value > element ? value : element)
@@ -19,7 +22,7 @@ class Bargraph extends StatelessWidget {
         color: Colors.black,
       );
 
-      Widget text = Text(dataList[value.toInt()]['sales'].toStringAsFixed(0),
+      Widget text = Text(numFormat.format(dataList[value.toInt()]['sales']),
           style: style);
 
       return SideTitleWidget(meta: meta, child: text);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 // import 'package:intl/intl.dart';
 import 'package:ka_inventory/components/appBar.dart';
 import 'package:ka_inventory/components/purchase_history/purchaseHistoryList.dart';
@@ -9,6 +10,8 @@ class Purchasehistory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    NumberFormat currencyFormat = NumberFormat.currency(
+        locale: 'en_PH', symbol: 'PHP ', decimalDigits: 1);
     var transList = userDataBox.get(userKey).transactionList;
 
     transList.sort((a, b) {
@@ -39,7 +42,6 @@ class Purchasehistory extends StatelessWidget {
               ),
               child: Container(
                 padding: EdgeInsets.all(10),
-                // height: double.minPositive,
                 width: double.infinity,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(5),
@@ -55,9 +57,10 @@ class Purchasehistory extends StatelessWidget {
                         children: [
                           Text('Total Sales:'),
                           Text(
-                            'PHP ${totalSales.toStringAsFixed(2)}',
+                            currencyFormat.format(totalSales),
                             style: TextStyle(
-                                color: Colors.green,
+                                color:
+                                    totalSales > 0 ? Colors.green : Colors.red,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20),
                           ),

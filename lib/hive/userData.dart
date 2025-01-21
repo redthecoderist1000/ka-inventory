@@ -11,6 +11,7 @@ class UserData {
     required this.merchList,
     required this.orderList,
     required this.transactionList,
+    required this.cashFlowLsit,
   });
 
   @HiveField(0)
@@ -30,4 +31,7 @@ class UserData {
 
   @HiveField(5, defaultValue: [])
   List transactionList;
+
+  @HiveField(6, defaultValue: [])
+  List cashFlowLsit;
 }

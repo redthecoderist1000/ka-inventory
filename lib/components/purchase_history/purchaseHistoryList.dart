@@ -53,7 +53,7 @@ class PurchaseHistoryList extends StatelessWidget {
               withDate: true,
               date: formatter.format(item['date']),
               count: getCount(curDate),
-              totalSales: getTotalSales(curDate),
+              totalSales: (getTotalSales(curDate)),
             );
           }
 

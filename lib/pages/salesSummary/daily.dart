@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:ka_inventory/hive/boxes.dart';
 
 class DailySummary extends StatefulWidget {
@@ -12,6 +13,10 @@ class DailySummary extends StatefulWidget {
 class _DailySummaryState extends State<DailySummary> {
   @override
   Widget build(BuildContext context) {
+    NumberFormat currencyFormat =
+        NumberFormat.currency(locale: 'en_PH', symbol: 'PHP ');
+    NumberFormat numberFormat = NumberFormat("#,##0.0", "en_PH");
+
     var transaction = userDataBox.get(userKey).transactionList;
     int totalQuantity = 0;
 
@@ -75,10 +80,6 @@ class _DailySummaryState extends State<DailySummary> {
                 (perCatList[0]['sales'] + perCatList[1]['sales'])) *
             100)
         .toStringAsFixed(2);
-    // String highestSale = (((perCatList[0]['sales'] - perCatList[1]['sales']) /
-    //             perCatList[1]['sales']) *
-    //         100)
-    //     .toStringAsFixed(2);
 
     return Padding(
       padding: const EdgeInsets.all(20.0),
@@ -135,7 +136,8 @@ class _DailySummaryState extends State<DailySummary> {
                                               fontSize: 18),
                                         ),
                                         Text(
-                                          "PHP ${item['price'] * item['quantity']}",
+                                          currencyFormat.format(
+                                              item['quantity'] * item['price']),
                                           style: TextStyle(fontSize: 18),
                                         ),
                                       ],
@@ -154,7 +156,8 @@ class _DailySummaryState extends State<DailySummary> {
                                           ),
                                         ),
                                         SizedBox(width: 10),
-                                        Text('Items sold: ${item['quantity']}')
+                                        Text(
+                                            'Items sold: ${numberFormat.format(item['quantity'])}'),
                                       ],
                                     ),
                                     SizedBox(height: 15)
@@ -194,7 +197,6 @@ class _DailySummaryState extends State<DailySummary> {
                       SizedBox(height: 10),
                       Text(
                         '$highestSale% of the total sales',
-                        // '${perCatList[1]['sales'] == 0.0 ? perCatList[0]['sales'] : highestSale}% higher than ${perCatList[1]['category']}',
                         style: TextStyle(color: Colors.blue[900]),
                       ),
                       SizedBox(height: 20),
@@ -206,7 +208,7 @@ class _DailySummaryState extends State<DailySummary> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "PHP ${perCatList[0]['sales']}",
+                                currencyFormat.format(perCatList[0]['sales']),
                                 style: TextStyle(fontSize: 15),
                               ),
                               Text(

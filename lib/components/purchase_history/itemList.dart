@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class Itemlist extends StatelessWidget {
   final String itemName;
@@ -23,6 +24,8 @@ class Itemlist extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    NumberFormat currencyFormat =
+        NumberFormat.currency(locale: 'en_PH', symbol: 'PHP', decimalDigits: 1);
     ShapeBorder listBorder = RoundedRectangleBorder(
         side: BorderSide(color: Colors.grey.shade400, width: .5),
         borderRadius: BorderRadius.circular(0));
@@ -52,7 +55,7 @@ class Itemlist extends StatelessWidget {
               ],
             )),
             trailing: Text(
-              '+ PHP $totalSales',
+              '+ ${currencyFormat.format(totalSales)}',
               style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
@@ -80,7 +83,7 @@ class Itemlist extends StatelessWidget {
               time,
             ),
             trailing: Text(
-              'PHP $price',
+              currencyFormat.format(price),
               style: priceStyle,
             ),
           ),
@@ -109,7 +112,7 @@ class Itemlist extends StatelessWidget {
           time,
         ),
         trailing: Text(
-          'PHP $price',
+          currencyFormat.format(price),
           style: priceStyle,
         ),
       );

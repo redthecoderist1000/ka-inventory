@@ -24,13 +24,15 @@ class UserDataAdapter extends TypeAdapter<UserData> {
       orderList: fields[4] == null ? [] : (fields[4] as List).cast<dynamic>(),
       transactionList:
           fields[5] == null ? [] : (fields[5] as List).cast<dynamic>(),
+      cashFlowLsit:
+          fields[6] == null ? [] : (fields[6] as List).cast<dynamic>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, UserData obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.uname)
       ..writeByte(1)
@@ -42,7 +44,9 @@ class UserDataAdapter extends TypeAdapter<UserData> {
       ..writeByte(4)
       ..write(obj.orderList)
       ..writeByte(5)
-      ..write(obj.transactionList);
+      ..write(obj.transactionList)
+      ..writeByte(6)
+      ..write(obj.cashFlowLsit);
   }
 
   @override

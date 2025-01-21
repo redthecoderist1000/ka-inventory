@@ -57,7 +57,8 @@ class Registerform extends StatelessWidget {
                             prepList: [],
                             merchList: [],
                             orderList: [],
-                            transactionList: []));
+                            transactionList: [],
+                            cashFlowLsit: []));
 
                     userKey = _usernameController.text;
 

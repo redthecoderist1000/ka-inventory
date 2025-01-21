@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:ka_inventory/components/appBar.dart';
 import 'package:ka_inventory/hive/boxes.dart';
+import 'package:ka_inventory/pdf/pdfAPI.dart';
 
 class Profit extends StatefulWidget {
   const Profit({super.key});
@@ -10,84 +12,88 @@ class Profit extends StatefulWidget {
 }
 
 class _ProfitState extends State<Profit> {
-  bool isMerch = false;
+  // bool isMerch = false;
+  String selected = 'All';
 
   @override
   Widget build(BuildContext context) {
-    var transaction = userDataBox.get(userKey).transactionList;
-    var filteredTrans =
-        transaction.where((element) => element['isMerch'] == isMerch);
+    NumberFormat numFormat = NumberFormat("#,##0.0", "en_PH");
+    NumberFormat currencyFormat = NumberFormat.currency(locale: 'fil_PH ');
+    List transactionList = [];
+    List merchList = [];
+    List prepList = [];
     double merchTotal = 0;
     double prepTotal = 0;
-    // double total = 0;
 
-    List<DropdownMenuItem> items = [
-      DropdownMenuItem(value: true, child: Text('Merchandise')),
-      DropdownMenuItem(value: false, child: Text('Prepared Foods')),
-    ];
-
-    // Combine same items in transaction
-    Map<String, Map<String, dynamic>> groupedTrans = {};
-
-    for (var item in filteredTrans) {
-      var name = item['name'];
-
-      if (groupedTrans.containsKey(name)) {
-        groupedTrans[name]!['quantity'] += item['quantity'];
-        groupedTrans[name]!['sales'] += item['quantity'] * item['price'];
+    userDataBox.get(userKey).transactionList.forEach((element) {
+      // check if existing in transactionList
+      if (transactionList.isEmpty) {
+        transactionList.add({
+          'id': element['id'],
+          'name': element['name'],
+          'quantity': element['quantity'],
+          'price': element['price'],
+          'isMerch': element['isMerch'],
+          'sales': element['quantity'] * element['price']
+        });
       } else {
-        groupedTrans[name] = {
-          'id': item['id'],
-          'name': name,
-          'quantity': item['quantity'],
-          'price': item['price'],
-          'isMerch': item['isMerch'],
-          'sales': item['quantity'] * item['price'],
-        };
-      }
-    }
-
-    // Convert combined transactions back to a list
-    List groupedTransList = groupedTrans.values.toList();
-
-    List header = [
-      "Item",
-      "Qty. Sold",
-      "Price (PHP)",
-      "Cost (PHP)",
-      "Gross Profit (PHP)",
-    ];
-
-    double getCost(String id, bool isMerch) {
-      if (isMerch) {
-        var list = userDataBox.get(userKey).merchList;
-
-        for (var item in list) {
-          if (item['mid'] == id) {
-            return item['cost'];
+        for (var item in transactionList) {
+          if (item['id'] == element['id'] &&
+              item['isMerch'] == element['isMerch']) {
+            item['quantity'] += element['quantity'];
+            item['sales'] += element['quantity'] * element['price'];
+            break;
+          } else {
+            transactionList.add({
+              'id': element['id'],
+              'name': element['name'],
+              'quantity': element['quantity'],
+              'price': element['price'],
+              'isMerch': element['isMerch'],
+              'sales': element['quantity'] * element['price']
+            });
+            break;
           }
         }
-      } else {
-        var list = userDataBox.get(userKey).prepList;
+      }
+    });
 
-        for (var item in list) {
-          if (item['pid'] == id) {
-            return item['totalCost'];
-          }
+    int getQuantity(String id, bool isMerch) {
+      for (var item in transactionList) {
+        if (item['id'] == id && item['isMerch'] == isMerch) {
+          return item['quantity'];
         }
       }
       return 0;
     }
 
-    for (var item in transaction) {
-      double cost = getCost(item['id'], item['isMerch']);
+    userDataBox.get(userKey).prepList.forEach((element) {
+      int quantity = getQuantity(element['pid'], false);
 
-      if (item['isMerch']) {
-        merchTotal += (item['price'] - cost) * item['quantity'];
-      } else {
-        prepTotal += (item['price'] * item['quantity']) - cost;
-      }
-    }
+      prepList.add({
+        'id': element['pid'],
+        'name': element['name'],
+        'quantity': quantity,
+        'price': element['sellPrice'],
+        'cost': element['totalCost'],
+        'isMerch': false,
+        'sales': element['sellPrice'] * quantity
+      });
+    });
+
+    userDataBox.get(userKey).merchList.forEach((element) {
+      int quantity = getQuantity(element['mid'], true);
+
+      merchList.add({
+        'id': element['mid'],
+        'name': element['name'],
+        'quantity': quantity,
+        'price': element['sellPrice'],
+        'cost': element['cost'],
+        'isMerch': true,
+        'sales': element['sellPrice'] * quantity
+      });
+    });
 
     TextStyle titleStyle = TextStyle(
       color: Colors.grey[800],
@@ -100,18 +106,73 @@ class _ProfitState extends State<Profit> {
       return TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 20);
     }
 
+    List<DropdownMenuItem> items = [
+      DropdownMenuItem(
+          alignment: Alignment.center,
+          value: 'All',
+          child: Text(
+            'All',
+          )),
+      DropdownMenuItem(
+          alignment: Alignment.center,
+          value: 'Merchandise',
+          child: Text('Merchandise')),
+      DropdownMenuItem(
+          alignment: Alignment.center,
+          value: 'Prepared Food',
+          child: Text('Prepared Foods')),
+    ];
+
+    List header = [
+      "Item",
+      "Qty. Sold",
+      "Price (PHP)",
+      "Cost (PHP)",
+      "Gross Profit (PHP)",
+    ];
+
+    List toDisplay = selected == 'All'
+        ? merchList + prepList
+        : selected == 'Merchandise'
+            ? merchList
+            : prepList;
+
+    for (var element in merchList) {
+      merchTotal += element['sales'] - (element['quantity'] * element['cost']);
+    }
+    for (var element in prepList) {
+      prepTotal += element['sales'] - element['cost'];
+    }
+
     return Scaffold(
       appBar: Appbar(title: "Gross Profit", leading: true),
       body: Column(
         children: [
-          DropdownButton(
-              items: items,
-              value: isMerch,
-              onChanged: (val) {
-                setState(() {
-                  isMerch = val as bool;
-                });
-              }),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              DropdownButton(
+                  alignment: Alignment.center,
+                  items: items,
+                  value: selected,
+                  onChanged: (val) {
+                    setState(() {
+                      selected = val.toString();
+                    });
+                  }),
+              IconButton(
+                  onPressed: () async {
+                    final pdfFile = await PdfAPI.generatePdf(
+                        merchList + prepList,
+                        merchTotal,
+                        prepTotal,
+                        merchTotal + prepTotal);
+
+                    PdfAPI.openFile(pdfFile);
+                  },
+                  icon: Icon(Icons.file_download_outlined))
+            ],
+          ),
           Container(
             padding: EdgeInsets.all(10),
             child: Container(
@@ -128,7 +189,9 @@ class _ProfitState extends State<Profit> {
                 ],
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment: selected == 'All'
+                    ? MainAxisAlignment.center
+                    : MainAxisAlignment.spaceAround,
                 children: [
                   Column(
                     children: [
@@ -137,23 +200,29 @@ class _ProfitState extends State<Profit> {
                         style: titleStyle,
                       ),
                       Text(
-                        'PHP ${merchTotal + prepTotal}',
+                        currencyFormat.format(merchTotal + prepTotal),
                         style: salesStyle(merchTotal + prepTotal),
                       ),
                     ],
                   ),
-                  Column(
-                    children: [
-                      Text(
-                        '${isMerch ? 'Merchandise' : 'Prepared Foods'} Gross Profit',
-                        style: titleStyle,
-                      ),
-                      Text(
-                        'PHP ${isMerch ? merchTotal : prepTotal}',
-                        style: salesStyle(isMerch ? merchTotal : prepTotal),
-                      ),
-                    ],
-                  )
+                  selected == 'All'
+                      ? SizedBox()
+                      : Column(
+                          children: [
+                            Text(
+                              '$selected Gross Profit',
+                              style: titleStyle,
+                            ),
+                            Text(
+                              currencyFormat.format(selected == 'Merchandise'
+                                  ? merchTotal
+                                  : prepTotal),
+                              style: salesStyle(selected == 'Merchandise'
+                                  ? merchTotal
+                                  : prepTotal),
+                            ),
+                          ],
+                        )
                 ],
               ),
             ),
@@ -191,9 +260,9 @@ class _ProfitState extends State<Profit> {
                 child: Column(
                   children: [
                     Table(
-                      children: List.generate(groupedTransList.length, (index) {
-                        var item = groupedTransList[index];
-                        var cost = getCost(item['id'], item['isMerch']);
+                      children: List.generate(toDisplay.length, (index) {
+                        var item = toDisplay[index];
+                        var cost = item['cost'];
                         var grossProfit = item['isMerch']
                             ? item['sales'] - (item['quantity'] * cost)
                             : item['sales'] - cost;
@@ -209,26 +278,26 @@ class _ProfitState extends State<Profit> {
                             TableCell(
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Text(item['quantity'].toString()),
+                                child: Text(numFormat.format(item['quantity'])),
                               ),
                             ),
                             TableCell(
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Text('${item['price']}'),
+                                child: Text(numFormat.format(item['price'])),
                               ),
                             ),
                             TableCell(
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Text(cost.toString()),
+                                child: Text(numFormat.format(cost)),
                               ),
                             ),
                             TableCell(
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                  grossProfit.toString(),
+                                  numFormat.format(grossProfit),
                                   style: TextStyle(
                                     color: grossProfit > 0
                                         ? Colors.green
