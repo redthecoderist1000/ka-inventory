@@ -17,6 +17,9 @@ class _ProfitState extends State<Profit> {
 
   @override
   Widget build(BuildContext context) {
+    // userDataBox.get(userKey).transactionList.clear();
+    // userDataBox.put(userKey, userDataBox.get(userKey));
+
     NumberFormat numFormat = NumberFormat("#,##0.0", "en_PH");
     NumberFormat currencyFormat = NumberFormat.currency(locale: 'fil_PH ');
     List transactionList = [];
@@ -27,6 +30,8 @@ class _ProfitState extends State<Profit> {
 
     userDataBox.get(userKey).transactionList.forEach((element) {
       // check if existing in transactionList
+      // print(element);
+
       if (transactionList.isEmpty) {
         transactionList.add({
           'id': element['id'],
@@ -34,6 +39,7 @@ class _ProfitState extends State<Profit> {
           'quantity': element['quantity'],
           'price': element['price'],
           'isMerch': element['isMerch'],
+          'cost': element['cost'],
           'sales': element['quantity'] * element['price']
         });
       } else {
@@ -50,6 +56,7 @@ class _ProfitState extends State<Profit> {
               'quantity': element['quantity'],
               'price': element['price'],
               'isMerch': element['isMerch'],
+              'cost': element['cost'],
               'sales': element['quantity'] * element['price']
             });
             break;
@@ -58,42 +65,31 @@ class _ProfitState extends State<Profit> {
       }
     });
 
-    int getQuantity(String id, bool isMerch) {
-      for (var item in transactionList) {
-        if (item['id'] == id && item['isMerch'] == isMerch) {
-          return item['quantity'];
-        }
+    for (var element in transactionList) {
+      // int quantity = getQuantity(element['pid'], false);
+
+      if (element['isMerch']) {
+        merchList.add({
+          'id': element['id'],
+          'name': element['name'],
+          'quantity': element['quantity'],
+          'price': element['price'],
+          'cost': element['cost'],
+          'isMerch': true,
+          'sales': element['price'] * element['quantity']
+        });
+      } else {
+        prepList.add({
+          'id': element['id'],
+          'name': element['name'],
+          'quantity': element['quantity'],
+          'price': element['price'],
+          'cost': element['cost'],
+          'isMerch': false,
+          'sales': element['price'] * element['quantity']
+        });
       }
-      return 0;
     }
-
-    userDataBox.get(userKey).prepList.forEach((element) {
-      int quantity = getQuantity(element['pid'], false);
-
-      prepList.add({
-        'id': element['pid'],
-        'name': element['name'],
-        'quantity': quantity,
-        'price': element['sellPrice'],
-        'cost': element['totalCost'],
-        'isMerch': false,
-        'sales': element['sellPrice'] * quantity
-      });
-    });
-
-    userDataBox.get(userKey).merchList.forEach((element) {
-      int quantity = getQuantity(element['mid'], true);
-
-      merchList.add({
-        'id': element['mid'],
-        'name': element['name'],
-        'quantity': quantity,
-        'price': element['sellPrice'],
-        'cost': element['cost'],
-        'isMerch': true,
-        'sales': element['sellPrice'] * quantity
-      });
-    });
 
     TextStyle titleStyle = TextStyle(
       color: Colors.grey[800],
@@ -146,177 +142,190 @@ class _ProfitState extends State<Profit> {
 
     return Scaffold(
       appBar: Appbar(title: "Gross Profit", leading: true),
-      body: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              DropdownButton(
-                  alignment: Alignment.center,
-                  items: items,
-                  value: selected,
-                  onChanged: (val) {
-                    setState(() {
-                      selected = val.toString();
-                    });
-                  }),
-              IconButton(
-                  onPressed: () async {
-                    final pdfFile = await PdfAPI.generatePdf(
-                        merchList + prepList,
-                        merchTotal,
-                        prepTotal,
-                        merchTotal + prepTotal);
-
-                    PdfAPI.openFile(pdfFile);
-                  },
-                  icon: Icon(Icons.file_download_outlined))
-            ],
-          ),
-          Container(
-            padding: EdgeInsets.all(10),
-            child: Container(
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade400,
-                    spreadRadius: 1,
-                    blurRadius: 2,
-                  ),
-                ],
+      body: toDisplay.isEmpty
+          ? Center(
+              child: Text(
+                'No data to display',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              child: Row(
-                mainAxisAlignment: selected == 'All'
-                    ? MainAxisAlignment.center
-                    : MainAxisAlignment.spaceAround,
-                children: [
-                  Column(
-                    children: [
-                      Text(
-                        'Total Gross Profit',
-                        style: titleStyle,
-                      ),
-                      Text(
-                        currencyFormat.format(merchTotal + prepTotal),
-                        style: salesStyle(merchTotal + prepTotal),
-                      ),
-                    ],
-                  ),
-                  selected == 'All'
-                      ? SizedBox()
-                      : Column(
+            )
+          : Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    DropdownButton(
+                        alignment: Alignment.center,
+                        items: items,
+                        value: selected,
+                        onChanged: (val) {
+                          setState(() {
+                            selected = val.toString();
+                          });
+                        }),
+                    IconButton(
+                        onPressed: () async {
+                          final pdfFile = await PdfAPI.generatePdf(
+                              merchList + prepList,
+                              merchTotal,
+                              prepTotal,
+                              merchTotal + prepTotal);
+
+                          PdfAPI.openFile(pdfFile);
+                        },
+                        icon: Icon(Icons.file_download_outlined))
+                  ],
+                ),
+                Container(
+                  padding: EdgeInsets.all(10),
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.shade400,
+                          spreadRadius: 1,
+                          blurRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: selected == 'All'
+                          ? MainAxisAlignment.center
+                          : MainAxisAlignment.spaceAround,
+                      children: [
+                        Column(
                           children: [
                             Text(
-                              '$selected Gross Profit',
+                              'Total Gross Profit',
                               style: titleStyle,
                             ),
                             Text(
-                              currencyFormat.format(selected == 'Merchandise'
-                                  ? merchTotal
-                                  : prepTotal),
-                              style: salesStyle(selected == 'Merchandise'
-                                  ? merchTotal
-                                  : prepTotal),
+                              currencyFormat.format(merchTotal + prepTotal),
+                              style: salesStyle(merchTotal + prepTotal),
                             ),
                           ],
-                        )
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Table(
-              children: [
-                TableRow(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.blueGrey,
-                  ),
-                  children: List.generate(header.length, (index) {
-                    return TableCell(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          header[index],
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, color: Colors.white),
                         ),
+                        selected == 'All'
+                            ? SizedBox()
+                            : Column(
+                                children: [
+                                  Text(
+                                    '$selected Gross Profit',
+                                    style: titleStyle,
+                                  ),
+                                  Text(
+                                    currencyFormat.format(
+                                        selected == 'Merchandise'
+                                            ? merchTotal
+                                            : prepTotal),
+                                    style: salesStyle(selected == 'Merchandise'
+                                        ? merchTotal
+                                        : prepTotal),
+                                  ),
+                                ],
+                              )
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Table(
+                    children: [
+                      TableRow(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.blueGrey,
+                        ),
+                        children: List.generate(header.length, (index) {
+                          return TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                header[index],
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              ),
+                            ),
+                          );
+                        }),
                       ),
-                    );
-                  }),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Column(
+                        children: [
+                          Table(
+                            children: List.generate(toDisplay.length, (index) {
+                              var item = toDisplay[index];
+                              var cost = item['cost'];
+                              var grossProfit = item['isMerch']
+                                  ? item['sales'] - (item['quantity'] * cost)
+                                  : item['sales'] - cost;
+
+                              return TableRow(
+                                children: [
+                                  TableCell(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(item['name']),
+                                    ),
+                                  ),
+                                  TableCell(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(item['quantity'].toString()),
+                                    ),
+                                  ),
+                                  TableCell(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child:
+                                          Text(numFormat.format(item['price'])),
+                                    ),
+                                  ),
+                                  TableCell(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(numFormat.format(cost)),
+                                    ),
+                                  ),
+                                  TableCell(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        numFormat.format(grossProfit),
+                                        style: TextStyle(
+                                          color: grossProfit > 0
+                                              ? Colors.green
+                                              : Colors.red,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Column(
-                  children: [
-                    Table(
-                      children: List.generate(toDisplay.length, (index) {
-                        var item = toDisplay[index];
-                        var cost = item['cost'];
-                        var grossProfit = item['isMerch']
-                            ? item['sales'] - (item['quantity'] * cost)
-                            : item['sales'] - cost;
-
-                        return TableRow(
-                          children: [
-                            TableCell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(item['name']),
-                              ),
-                            ),
-                            TableCell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(numFormat.format(item['quantity'])),
-                              ),
-                            ),
-                            TableCell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(numFormat.format(item['price'])),
-                              ),
-                            ),
-                            TableCell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(numFormat.format(cost)),
-                              ),
-                            ),
-                            TableCell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  numFormat.format(grossProfit),
-                                  style: TextStyle(
-                                    color: grossProfit > 0
-                                        ? Colors.green
-                                        : Colors.red,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      }),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:ka_inventory/components/ifEmpty/emptyMerch.dart';
 import 'package:ka_inventory/components/inventoryTile.dart';
 import 'package:ka_inventory/hive/boxes.dart';
 
@@ -146,34 +147,39 @@ class _MerchinvtabState extends State<Merchinvtab> {
         builder: (context, box, snapshot) {
           List merchList = box.get(userKey)?.merchList ?? [];
 
-          return Center(
-            child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                itemCount: merchList.length,
-                itemBuilder: (context, index) {
-                  var data = merchList[index];
+          if (merchList.isEmpty) {
+            return Emptymerch();
+          } else {
+            return Center(
+              child: ListView.builder(
+                  clipBehavior: Clip.hardEdge,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  itemCount: merchList.length,
+                  itemBuilder: (context, index) {
+                    var data = merchList[index];
 
-                  return Inventorytile(
-                    label: data['name'],
-                    quantity: data['quantity'],
-                    isMerch: true,
-                    onDelete: (context) {
-                      // delete from merchList
-                      box.get(userKey).merchList.removeAt(index);
+                    return Inventorytile(
+                      label: data['name'],
+                      quantity: data['quantity'],
+                      isMerch: true,
+                      onDelete: (context) {
+                        // delete from merchList
+                        box.get(userKey).merchList.removeAt(index);
 
-                      // delete from orderList
-                      box.get(userKey).orderList.removeWhere(
-                          (order) => order['name'] == data['name']);
+                        // delete from orderList
+                        box.get(userKey).orderList.removeWhere(
+                            (order) => order['name'] == data['name']);
 
-                      // save final box
-                      userDataBox.put(userKey, box.get(userKey));
-                    },
-                    onEdit: (context) {
-                      editInventory(data);
-                    },
-                  );
-                }),
-          );
+                        // save final box
+                        userDataBox.put(userKey, box.get(userKey));
+                      },
+                      onEdit: (context) {
+                        editInventory(data);
+                      },
+                    );
+                  }),
+            );
+          }
         });
   }
 }

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:ka_inventory/components/appBar.dart';
+import 'package:ka_inventory/components/ifEmpty/emptyMerch.dart';
+import 'package:ka_inventory/components/ifEmpty/emptyPrepared.dart';
 import 'package:ka_inventory/components/prepMerchTab.dart';
 import 'package:ka_inventory/components/salestile.dart';
 import 'package:ka_inventory/hive/boxes.dart';
@@ -37,82 +39,90 @@ class _SalesState extends State<Sales> {
                   child: TabBarView(
                     children: [
                       // prepared food tab
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                        child: GridView.builder(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
-                          ),
-                          itemCount: box.get(userKey)!.prepList.length,
-                          itemBuilder: (context, index) {
-                            final item = box.get(userKey)!.prepList[index];
 
-                            return Salestile(
-                              name: item['name'],
-                              image: item['image'],
-                              onTap: () {
-                                addToOrder(
-                                    index,
-                                    item['pid'],
-                                    item['image'],
-                                    item['name'],
-                                    item['sellPrice'],
-                                    item['totalCost'],
-                                    false);
-                              },
-                            );
-                          },
-                        ),
-                      ),
+                      userDataBox.get(userKey)!.prepList.isEmpty
+                          ? Emptyprepared()
+                          : Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15.0),
+                              child: GridView.builder(
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 10,
+                                  mainAxisSpacing: 10,
+                                ),
+                                itemCount: box.get(userKey)!.prepList.length,
+                                itemBuilder: (context, index) {
+                                  final item =
+                                      box.get(userKey)!.prepList[index];
+
+                                  return Salestile(
+                                    name: item['name'],
+                                    image: item['image'],
+                                    onTap: () {
+                                      addToOrder(
+                                          index,
+                                          item['pid'],
+                                          item['image'],
+                                          item['name'],
+                                          item['sellPrice'],
+                                          item['totalCost'],
+                                          false);
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
                       // merchandise tab
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                        child: GridView.builder(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
-                          ),
-                          // itemCount: box.get(userKey)!.merchList.length,
-                          itemCount: box
-                              .get(userKey)!
-                              .merchList
-                              .where(
-                                  (item) => item['quantity'] > 0 ? true : false)
-                              .length,
-                          itemBuilder: (context, index) {
-                            // final item = box.get(userKey)!.merchList[index];
-                            final filteredMerchList = box
-                                .get(userKey)!
-                                .merchList
-                                .where((item) =>
-                                    item['quantity'] > 0 ? true : false)
-                                .toList();
-                            final item = filteredMerchList[index];
+                      userDataBox.get(userKey)!.merchList.isEmpty
+                          ? Emptymerch()
+                          : Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15.0),
+                              child: GridView.builder(
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 10,
+                                  mainAxisSpacing: 10,
+                                ),
+                                // itemCount: box.get(userKey)!.merchList.length,
+                                itemCount: box
+                                    .get(userKey)!
+                                    .merchList
+                                    .where((item) =>
+                                        item['quantity'] > 0 ? true : false)
+                                    .length,
+                                itemBuilder: (context, index) {
+                                  // final item = box.get(userKey)!.merchList[index];
+                                  final filteredMerchList = box
+                                      .get(userKey)!
+                                      .merchList
+                                      .where((item) =>
+                                          item['quantity'] > 0 ? true : false)
+                                      .toList();
+                                  final item = filteredMerchList[index];
 
-                            final filtered_index =
-                                box.get(userKey)!.merchList.indexOf(item);
+                                  final filtered_index =
+                                      box.get(userKey)!.merchList.indexOf(item);
 
-                            return Salestile(
-                                name: item['name'],
-                                image: item['image'],
-                                onTap: () {
-                                  addToOrder(
-                                      filtered_index,
-                                      item['mid'],
-                                      item['image'],
-                                      item['name'],
-                                      item['sellPrice'],
-                                      item['cost'],
-                                      true);
-                                });
-                          },
-                        ),
-                      ),
+                                  return Salestile(
+                                      name: item['name'],
+                                      image: item['image'],
+                                      onTap: () {
+                                        addToOrder(
+                                            filtered_index,
+                                            item['mid'],
+                                            item['image'],
+                                            item['name'],
+                                            item['sellPrice'],
+                                            item['cost'],
+                                            true);
+                                      });
+                                },
+                              ),
+                            ),
                     ],
                   ),
                 ),

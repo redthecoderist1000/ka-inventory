@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 // import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:ka_inventory/components/ifEmpty/emptyPrepared.dart';
 import 'package:ka_inventory/components/inventoryTile.dart';
 import 'package:ka_inventory/hive/boxes.dart';
 
@@ -134,31 +135,36 @@ class _PrepinvtabState extends State<Prepinvtab> {
         builder: (context, box, snapshot) {
           List prepList = box.get(userKey)?.prepList ?? [];
 
-          return Center(
-            child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                itemCount: prepList.length,
-                itemBuilder: (context, index) {
-                  var data = prepList[index];
+          if (prepList.isEmpty) {
+            return Emptyprepared();
+          } else {
+            return Center(
+              child: ListView.builder(
+                  clipBehavior: Clip.hardEdge,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  itemCount: prepList.length,
+                  itemBuilder: (context, index) {
+                    var data = prepList[index];
 
-                  return Inventorytile(
-                    label: data['name'],
-                    isMerch: false,
-                    onDelete: (context) {
-                      // delte item from the preplist
-                      box.get(userKey).prepList.removeAt(index);
-                      // delete item from the orderList
-                      box.get(userKey).orderList.removeWhere(
-                          (element) => element['name'] == data['name']);
-                      // update the user data box
-                      userDataBox.put(userKey, box.get(userKey));
-                    },
-                    onEdit: (context) {
-                      editInventory(data);
-                    },
-                  );
-                }),
-          );
+                    return Inventorytile(
+                      label: data['name'],
+                      isMerch: false,
+                      onDelete: (context) {
+                        // delte item from the preplist
+                        box.get(userKey).prepList.removeAt(index);
+                        // delete item from the orderList
+                        box.get(userKey).orderList.removeWhere(
+                            (element) => element['name'] == data['name']);
+                        // update the user data box
+                        userDataBox.put(userKey, box.get(userKey));
+                      },
+                      onEdit: (context) {
+                        editInventory(data);
+                      },
+                    );
+                  }),
+            );
+          }
         });
   }
 }

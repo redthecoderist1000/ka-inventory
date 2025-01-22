@@ -112,11 +112,6 @@ class _SummaryState extends State<Summary> {
             dateFrom = DateTime(dateFrom.year, dateFrom.month - 1, 1);
           });
         }
-
-        // setState(() {
-        //   dateFrom =
-        //       DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
-        // });
       }
     }
 

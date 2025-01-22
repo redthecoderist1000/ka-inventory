@@ -111,6 +111,7 @@ class OrderState extends State<Order> {
             'price': item['price'],
             'quantity': item['quantity'],
             'isMerch': item['isMerch'],
+            'cost': item['cost'],
             'date': DateTime.now()
           });
         }
@@ -147,41 +148,47 @@ class OrderState extends State<Order> {
             var order = box.get(userKey)!.orderList;
 
             return SafeArea(
-                child: Column(
-              children: [
-                order.isEmpty
+                child: order.isEmpty
                     ? Center(
-                        child: Text('No order yet'),
-                      )
-                    : Expanded(
-                        child: ListView.builder(
-                        itemCount: order.length,
-                        itemBuilder: (context, index) {
-                          final item = order[index];
+                        child: Text(
+                        'You have no orders yet',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ))
+                    : Column(
+                        children: [
+                          Expanded(
+                              child: ListView.builder(
+                            itemCount: order.length,
+                            itemBuilder: (context, index) {
+                              final item = order[index];
 
-                          return Ordertile(
-                            name: item['name'],
-                            image: item['image'],
-                            price: item['price'],
-                            onSlide: (context) {
-                              onSlide(context, index);
+                              return Ordertile(
+                                name: item['name'],
+                                image: item['image'],
+                                price: item['price'],
+                                onSlide: (context) {
+                                  onSlide(context, index);
+                                },
+                                increment: () {
+                                  increment(
+                                      index, item['isMerch'], item['name']);
+                                },
+                                decrement: () {
+                                  decrement(index);
+                                },
+                                quantity: item['quantity'] ?? 0,
+                                isMerch: item['isMerch'],
+                              );
                             },
-                            increment: () {
-                              increment(index, item['isMerch'], item['name']);
-                            },
-                            decrement: () {
-                              decrement(index);
-                            },
-                            quantity: item['quantity'] ?? 0,
-                            isMerch: item['isMerch'],
-                          );
-                        },
-                      )),
-                SizedBox(
-                  height: 60,
-                ),
-              ],
-            ));
+                          )),
+                          SizedBox(
+                            height: 60,
+                          ),
+                        ],
+                      ));
           }),
       bottomSheet: ValueListenableBuilder(
           valueListenable: userDataBox.listenable(keys: [userKey]),

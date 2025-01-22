@@ -62,7 +62,7 @@ class _InventoryState extends State<Inventory> {
               height: 10,
             ),
             Expanded(
-              child: TabBarView(children: [
+              child: TabBarView(clipBehavior: Clip.antiAlias, children: [
                 Prepinvtab(),
                 Merchinvtab(),
               ]),

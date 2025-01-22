@@ -28,55 +28,66 @@ class Purchasehistory extends StatelessWidget {
 
     return Scaffold(
       appBar: Appbar(title: 'Purchase History', leading: true),
-      backgroundColor: Colors.blueGrey.shade100,
+      // backgroundColor: Colors.blueGrey.shade100,
       body: SafeArea(
-          child: Center(
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.blueGrey.shade100,
-                border: Border(
-                    bottom: BorderSide(color: Colors.grey.shade400, width: .5)),
-              ),
-              child: Container(
-                padding: EdgeInsets.all(10),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
-                    color: Colors.white,
-                    border: Border(
-                        bottom: BorderSide(
-                            color: Colors.grey.shade400, width: .5))),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Column(
-                        children: [
-                          Text('Total Sales:'),
-                          Text(
-                            currencyFormat.format(totalSales),
-                            style: TextStyle(
-                                color:
-                                    totalSales > 0 ? Colors.green : Colors.red,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20),
+          child: transList.isEmpty
+              ? Center(
+                  child: Text(
+                  'No data to display',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ))
+              : Center(
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.blueGrey.shade100,
+                          border: Border(
+                              bottom: BorderSide(
+                                  color: Colors.grey.shade400, width: .5)),
+                        ),
+                        child: Container(
+                          padding: EdgeInsets.all(10),
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: Colors.white,
+                              border: Border(
+                                  bottom: BorderSide(
+                                      color: Colors.grey.shade400, width: .5))),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Center(
+                                child: Column(
+                                  children: [
+                                    Text('Total Sales:'),
+                                    Text(
+                                      currencyFormat.format(totalSales),
+                                      style: TextStyle(
+                                          color: totalSales > 0
+                                              ? Colors.green
+                                              : Colors.red,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              child: PurchaseHistoryList(transList: transList),
-            ),
-          ],
-        ),
-      )),
+                      Expanded(
+                        child: PurchaseHistoryList(transList: transList),
+                      ),
+                    ],
+                  ),
+                )),
     );
   }
 }
