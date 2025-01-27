@@ -17,6 +17,7 @@ class UserDataAdapter extends TypeAdapter<UserData> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return UserData(
+      uid: fields[8] as String,
       uname: fields[0] as String,
       password: fields[1] as String,
       prepList: fields[2] == null ? [] : (fields[2] as List).cast<dynamic>(),
@@ -26,13 +27,16 @@ class UserDataAdapter extends TypeAdapter<UserData> {
           fields[5] == null ? [] : (fields[5] as List).cast<dynamic>(),
       cashFlowLsit:
           fields[6] == null ? [] : (fields[6] as List).cast<dynamic>(),
+      isLogged: fields[7] == null ? false : fields[7] as bool,
+      inventoryHistory:
+          fields[9] == null ? [] : (fields[9] as List).cast<dynamic>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, UserData obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.uname)
       ..writeByte(1)
@@ -46,7 +50,13 @@ class UserDataAdapter extends TypeAdapter<UserData> {
       ..writeByte(5)
       ..write(obj.transactionList)
       ..writeByte(6)
-      ..write(obj.cashFlowLsit);
+      ..write(obj.cashFlowLsit)
+      ..writeByte(7)
+      ..write(obj.isLogged)
+      ..writeByte(8)
+      ..write(obj.uid)
+      ..writeByte(9)
+      ..write(obj.inventoryHistory);
   }
 
   @override

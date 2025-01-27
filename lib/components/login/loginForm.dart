@@ -36,23 +36,32 @@ class Loginform extends StatelessWidget {
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   // Handle registration logic here
+                  bool userExists = false;
 
-                  // check if user exists
-                  if (userDataBox.get(_usernameController.text) != null) {
-                    UserData userData =
-                        userDataBox.get(_usernameController.text);
+                  // iterate through all users
+                  for (var element in userDataBox.keys) {
+                    // check if user exists
+                    if (userDataBox.get(element).uname ==
+                        _usernameController.text.trim()) {
+                      UserData userData = userDataBox.get(element);
 
-                    // check password
-                    if (userData.password == _passwordController.text) {
-                      userKey = _usernameController.text;
-                      Navigator.pushNamed(context, '/menu');
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Password does not match')));
+                      // check password
+                      if (userData.password ==
+                          _passwordController.text.trim()) {
+                        userExists = true;
+                        userKey = userData.uid;
+                        Navigator.pushNamed(context, '/menu');
+                      } else {
+                        userExists = true;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Password does not match')));
+                      }
                     }
-                  } else {
+                  }
+                  if (!userExists) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('User not found')));
+                        const SnackBar(content: Text('User does not exist')));
                   }
                 }
               },

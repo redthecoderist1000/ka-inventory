@@ -106,6 +106,7 @@ class OrderState extends State<Order> {
         for (var item in orderList) {
           userDataBox.get(userKey).transactionList.add({
             // 'user': userKey,
+            'tid': box.get(userKey).transactionList.length + 1,
             'id': item['id'],
             'name': item['name'],
             'price': item['price'],

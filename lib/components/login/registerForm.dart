@@ -45,28 +45,33 @@ class Registerform extends StatelessWidget {
                   // Handle registration logic here
 
                   // check if existing user
-                  if (userDataBox.get(_usernameController.text) != null) {
+                  if (userDataBox.get(_usernameController.text.trim()) !=
+                      null) {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                         content: Text('Username already exists')));
                   } else {
+                    // get last index of user
+                    var uid = userDataBox.keys.length + 1;
+
                     userDataBox.put(
-                        _usernameController.text,
+                        'USR-$uid',
                         UserData(
-                            uname: _usernameController.text,
-                            password: _passwordController.text,
+                            uid: 'USR-$uid',
+                            uname: _usernameController.text.trim(),
+                            password: _passwordController.text.trim(),
                             prepList: [],
                             merchList: [],
                             orderList: [],
                             transactionList: [],
-                            cashFlowLsit: []));
+                            cashFlowLsit: [],
+                            isLogged: true,
+                            inventoryHistory: []));
 
-                    userKey = _usernameController.text;
+                    userKey = 'USR-$uid';
 
                     _usernameController.clear();
                     _passwordController.clear();
                     _confirmPasswordController.clear();
-
-                    Navigator.pushNamed(context, '/menu');
                   }
                 }
               },

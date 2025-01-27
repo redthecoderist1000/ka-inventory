@@ -11,8 +11,11 @@ class Menu extends StatefulWidget {
 
 class _MenuState extends State<Menu> {
   logOut() {
+    userDataBox.get(userKey).isLogged = false;
+    userDataBox.put(userKey, userDataBox.get(userKey));
+
     userKey = '';
-    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    Navigator.pushNamedAndRemoveUntil(context, '/auth', (route) => false);
   }
 
   logOutDialog() {
@@ -37,6 +40,8 @@ class _MenuState extends State<Menu> {
 
   @override
   Widget build(BuildContext context) {
+    // print(userKey);
+
     return PopScope(
       // onWillPop: () async => false,R
       // onPopInvokedWithResult: showBackMessage,?
@@ -50,8 +55,11 @@ class _MenuState extends State<Menu> {
           automaticallyImplyLeading: false,
           actions: [
             IconButton(
-              icon: Icon(Icons.logout_rounded),
-              onPressed: logOutDialog,
+              icon: Icon(Icons.person_2_rounded,
+                  size: 30, color: Colors.blueGrey),
+              onPressed: () {
+                Navigator.pushNamed(context, '/profile');
+              },
             ),
           ],
         ),

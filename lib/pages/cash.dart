@@ -14,19 +14,23 @@ class Cash extends StatefulWidget {
 
 class _CashState extends State<Cash> {
   List<TextEditingController> inAmtConList = [];
+  List<TextEditingController> inLabConList = [];
   List<TextEditingController> outAmtConList = [];
+  List<TextEditingController> outLabConList = [];
   List<Widget> inInput = [];
   List<Widget> outInput = [];
   TextEditingController beginningCashCon = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
   List cashFlowBox = [];
+  double startingSales = 0;
 
   @override
   void initState() {
     super.initState();
 
     cashFlowBox = userDataBox.get(userKey).cashFlowLsit;
+    print(cashFlowBox);
 
     if (cashFlowBox.isNotEmpty) {
       beginningCashCon.text =
@@ -34,6 +38,66 @@ class _CashState extends State<Cash> {
     } else {
       beginningCashCon.text = '0';
     }
+
+    var lastCashFlowDate = cashFlowBox.isNotEmpty
+        ? cashFlowBox[cashFlowBox.length - 1]['date']
+        : null;
+
+    for (var item in userDataBox.get(userKey).transactionList) {
+      // startingSales += item['price'] * item['cost'];
+
+      if (lastCashFlowDate != null) {
+        if (item['date'].isAfter(lastCashFlowDate)) {
+          startingSales += item['price'] * item['quantity'];
+        }
+      } else {
+        startingSales += item['price'] * item['quantity'];
+      }
+    }
+
+    print('Starting Sales: $startingSales');
+
+    if (startingSales > 0) {
+      inAmtConList.add(TextEditingController(text: startingSales.toString()));
+      inLabConList.add(TextEditingController(text: 'Starting Sales'));
+      inInput.add(buildInput(inAmtConList[inAmtConList.length - 1], 'Inflow',
+          inAmtConList.length - 1, inLabConList[inLabConList.length - 1]));
+    }
+  }
+
+  Widget buildInput(TextEditingController amtCon, String type, int index,
+      TextEditingController labCon) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Text('$type ${index + 1}'),
+        SizedBox(
+          height: 50,
+          width: 150,
+          child: TextFormField(
+            decoration: InputDecoration(
+                hintText: 'label', hintStyle: TextStyle(color: Colors.grey)),
+            controller: labCon,
+          ),
+        ),
+        SizedBox(
+          height: 50,
+          width: 70,
+          child: TextFormField(
+              decoration: InputDecoration(
+                  hintText: 'amount', hintStyle: TextStyle(color: Colors.grey)),
+              textAlign: TextAlign.center,
+              controller: amtCon,
+              keyboardType: TextInputType.number,
+              onChanged: (val) {
+                setState(() {});
+              },
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+              ]),
+        ),
+      ],
+    );
   }
 
   @override
@@ -63,45 +127,25 @@ class _CashState extends State<Cash> {
       endingCash = cashInflow - cashOutflow;
     }
 
-    Widget buildInput(TextEditingController amtCon, String type, int index) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text('$type ${index + 1}'),
-          SizedBox(
-            height: 50,
-            width: 70,
-            child: TextFormField(
-                decoration: InputDecoration(hintText: 'amount'),
-                textAlign: TextAlign.center,
-                controller: amtCon,
-                keyboardType: TextInputType.number,
-                onChanged: (val) {
-                  setState(() {});
-                },
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                ]),
-          ),
-        ],
-      );
-    }
-
     addInflow() {
       TextEditingController amtCon = TextEditingController();
+      TextEditingController labCon = TextEditingController();
       int index = inAmtConList.length;
       setState(() {
         inAmtConList.add(amtCon);
-        inInput.add(buildInput(amtCon, 'Inflow', index));
+        inLabConList.add(labCon);
+        inInput.add(buildInput(amtCon, 'Inflow', index, labCon));
       });
     }
 
     addOutflow() {
       TextEditingController amtCon = TextEditingController();
+      TextEditingController labCon = TextEditingController();
       int index = outAmtConList.length;
       setState(() {
         outAmtConList.add(amtCon);
-        outInput.add(buildInput(amtCon, 'Outflow', index));
+        outLabConList.add(labCon);
+        outInput.add(buildInput(amtCon, 'Outflow', index, labCon));
       });
     }
 

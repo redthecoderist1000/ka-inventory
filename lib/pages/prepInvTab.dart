@@ -147,7 +147,7 @@ class _PrepinvtabState extends State<Prepinvtab> {
                     var data = prepList[index];
 
                     return Inventorytile(
-                      label: data['name'],
+                      label: "${data['name']}",
                       isMerch: false,
                       onDelete: (context) {
                         // delte item from the preplist

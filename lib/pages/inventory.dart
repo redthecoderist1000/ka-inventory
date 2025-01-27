@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ka_inventory/components/appBar.dart';
 import 'package:ka_inventory/components/prepMerchTab.dart';
+import 'package:ka_inventory/hive/boxes.dart';
 import 'package:ka_inventory/pages/merchInvTab.dart';
 import 'package:ka_inventory/pages/prepInvTab.dart';
 
@@ -67,6 +68,9 @@ class _InventoryState extends State<Inventory> {
                 Merchinvtab(),
               ]),
             ),
+            SizedBox(
+              height: 70,
+            ),
           ]),
         ),
         bottomSheet: Container(
@@ -76,9 +80,8 @@ class _InventoryState extends State<Inventory> {
           color: Colors.transparent,
           child: ElevatedButton(
             style: ButtonStyle(
-              backgroundColor:
-                  MaterialStateProperty.all<Color>(Colors.blueGrey),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              backgroundColor: WidgetStateProperty.all<Color>(Colors.blueGrey),
+              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),

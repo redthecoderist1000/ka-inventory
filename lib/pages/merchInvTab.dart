@@ -17,11 +17,11 @@ class _MerchinvtabState extends State<Merchinvtab> {
     editInventory(data) {
       var formKey = GlobalKey<FormState>();
       var nameController = TextEditingController();
-      var quantityController = TextEditingController();
+      // var quantityController = TextEditingController();
       var priceController = TextEditingController();
 
       nameController.text = data['name'];
-      quantityController.text = data['quantity'].toString();
+      // quantityController.text = data['quantity'].toString();
       priceController.text = data['sellPrice'].toString();
 
       saveInventory() {
@@ -32,7 +32,7 @@ class _MerchinvtabState extends State<Merchinvtab> {
             'category': data['category'],
             'sellPrice': double.parse(priceController.text),
             'cost': data['cost'],
-            'quantity': int.parse(quantityController.text),
+            'quantity': data['quantity'],
             'image': data['image']
           };
 
@@ -84,17 +84,17 @@ class _MerchinvtabState extends State<Merchinvtab> {
                             return null;
                           },
                         ),
-                        TextFormField(
-                          decoration: InputDecoration(labelText: 'Quantity'),
-                          controller: quantityController,
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please enter a quantity';
-                            }
-                            return null;
-                          },
-                        ),
+                        // TextFormField(
+                        //   decoration: InputDecoration(labelText: 'Quantity'),
+                        //   controller: quantityController,
+                        //   keyboardType: TextInputType.number,
+                        //   validator: (value) {
+                        //     if (value!.isEmpty) {
+                        //       return 'Please enter a quantity';
+                        //     }
+                        //     return null;
+                        //   },
+                        // ),
                         TextFormField(
                           decoration:
                               InputDecoration(labelText: 'Selling Price'),

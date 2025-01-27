@@ -5,6 +5,7 @@ part 'userData.g.dart';
 @HiveType(typeId: 1)
 class UserData {
   UserData({
+    required this.uid,
     required this.uname,
     required this.password,
     required this.prepList,
@@ -12,6 +13,8 @@ class UserData {
     required this.orderList,
     required this.transactionList,
     required this.cashFlowLsit,
+    required this.isLogged,
+    required this.inventoryHistory,
   });
 
   @HiveField(0)
@@ -34,4 +37,13 @@ class UserData {
 
   @HiveField(6, defaultValue: [])
   List cashFlowLsit;
+
+  @HiveField(7, defaultValue: false)
+  bool isLogged = false;
+
+  @HiveField(8)
+  String uid;
+
+  @HiveField(9, defaultValue: [])
+  List inventoryHistory;
 }

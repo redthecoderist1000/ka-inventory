@@ -11,14 +11,14 @@ class Emptyprepared extends StatelessWidget {
         children: [
           Text('There is no Prepared Food yet!'),
           SizedBox(height: 10),
-          MaterialButton(
-            textColor: Colors.white,
-            color: const Color(0xFF607D8B),
-            onPressed: () {
-              Navigator.pushNamed(context, '/add_inventory');
-            },
-            child: Text('Add Here'),
-          ),
+          // MaterialButton(
+          //   textColor: Colors.white,
+          //   color: const Color(0xFF607D8B),
+          //   onPressed: () {
+          //     Navigator.pushNamed(context, '/add_inventory');
+          //   },
+          //   child: Text('Add Here'),
+          // ),
         ],
       ),
     );

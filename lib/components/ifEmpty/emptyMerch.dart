@@ -11,14 +11,6 @@ class Emptymerch extends StatelessWidget {
         children: [
           Text('There is no Merchandise yet!'),
           SizedBox(height: 10),
-          MaterialButton(
-            textColor: Colors.white,
-            color: const Color(0xFF607D8B),
-            onPressed: () {
-              Navigator.pushNamed(context, '/add_inventory');
-            },
-            child: Text('Add Here'),
-          ),
         ],
       ),
     );
