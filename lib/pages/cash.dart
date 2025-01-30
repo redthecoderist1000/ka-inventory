@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:ka_inventory/components/appBar.dart';
-import 'package:ka_inventory/components/button1.dart';
 import 'package:ka_inventory/hive/boxes.dart';
 
 class Cash extends StatefulWidget {
@@ -13,484 +12,454 @@ class Cash extends StatefulWidget {
 }
 
 class _CashState extends State<Cash> {
-  List<TextEditingController> inAmtConList = [];
-  List<TextEditingController> inLabConList = [];
-  List<TextEditingController> outAmtConList = [];
-  List<TextEditingController> outLabConList = [];
-  List<Widget> inInput = [];
-  List<Widget> outInput = [];
-  TextEditingController beginningCashCon = TextEditingController();
-  final formKey = GlobalKey<FormState>();
+  DateTime date = DateTime.now();
+  DateTime yesterday = DateTime.now().subtract(Duration(days: 1));
+  addInflowDialog() {
+    // add inflow
+    var labCon = TextEditingController();
+    var amountCon = TextEditingController();
+    var formKey = GlobalKey<FormState>();
 
-  List cashFlowBox = [];
-  double startingSales = 0;
-
-  @override
-  void initState() {
-    super.initState();
-
-    cashFlowBox = userDataBox.get(userKey).cashFlowLsit;
-    print(cashFlowBox);
-
-    if (cashFlowBox.isNotEmpty) {
-      beginningCashCon.text =
-          cashFlowBox[cashFlowBox.length - 1]['endingCash'].toString();
-    } else {
-      beginningCashCon.text = '0';
-    }
-
-    var lastCashFlowDate = cashFlowBox.isNotEmpty
-        ? cashFlowBox[cashFlowBox.length - 1]['date']
-        : null;
-
-    for (var item in userDataBox.get(userKey).transactionList) {
-      // startingSales += item['price'] * item['cost'];
-
-      if (lastCashFlowDate != null) {
-        if (item['date'].isAfter(lastCashFlowDate)) {
-          startingSales += item['price'] * item['quantity'];
-        }
-      } else {
-        startingSales += item['price'] * item['quantity'];
-      }
-    }
-
-    print('Starting Sales: $startingSales');
-
-    if (startingSales > 0) {
-      inAmtConList.add(TextEditingController(text: startingSales.toString()));
-      inLabConList.add(TextEditingController(text: 'Starting Sales'));
-      inInput.add(buildInput(inAmtConList[inAmtConList.length - 1], 'Inflow',
-          inAmtConList.length - 1, inLabConList[inLabConList.length - 1]));
-    }
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Add Inflow'),
+            content: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: labCon,
+                    decoration: InputDecoration(labelText: 'Label'),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter label';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: amountCon,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Amount',
+                    ),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter amount';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Cancel')),
+              ElevatedButton(
+                  style: ButtonStyle(
+                    elevation: WidgetStateProperty.all(2),
+                  ),
+                  onPressed: () {
+                    if (formKey.currentState!.validate()) {
+                      addinflow(labCon.text, double.parse(amountCon.text));
+                    }
+                  },
+                  child: Text('Save')),
+            ],
+          );
+        });
   }
 
-  Widget buildInput(TextEditingController amtCon, String type, int index,
-      TextEditingController labCon) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Text('$type ${index + 1}'),
-        SizedBox(
-          height: 50,
-          width: 150,
-          child: TextFormField(
-            decoration: InputDecoration(
-                hintText: 'label', hintStyle: TextStyle(color: Colors.grey)),
-            controller: labCon,
-          ),
-        ),
-        SizedBox(
-          height: 50,
-          width: 70,
-          child: TextFormField(
-              decoration: InputDecoration(
-                  hintText: 'amount', hintStyle: TextStyle(color: Colors.grey)),
-              textAlign: TextAlign.center,
-              controller: amtCon,
-              keyboardType: TextInputType.number,
-              onChanged: (val) {
-                setState(() {});
-              },
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-              ]),
-        ),
-      ],
-    );
+  addinflow(String label, double amount) {
+    // add inflow
+    userDataBox.get(userKey).cashFlowLsit.add({
+      'cid': userDataBox.get(userKey).cashFlowLsit.length + 1,
+      'label': label,
+      'amount': amount,
+      'type': 'inflow',
+      'date': DateTime.now()
+    });
+    userDataBox.put(userKey, userDataBox.get(userKey));
+    Navigator.pop(context);
+  }
+
+  addOutFlowDialog() {
+    // add inflow
+    var labCon = TextEditingController();
+    var amountCon = TextEditingController();
+    var formKey = GlobalKey<FormState>();
+
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Add Outflow'),
+            content: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: labCon,
+                    decoration: InputDecoration(labelText: 'Label'),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter label';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: amountCon,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Amount',
+                    ),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter amount';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Cancel')),
+              ElevatedButton(
+                  style: ButtonStyle(
+                    elevation: WidgetStateProperty.all(2),
+                  ),
+                  onPressed: () {
+                    if (formKey.currentState!.validate()) {
+                      addOutFlow(labCon.text, double.parse(amountCon.text));
+                    }
+                  },
+                  child: Text('Save')),
+            ],
+          );
+        });
+  }
+
+  addOutFlow(String label, double amount) {
+    // add inflow
+    userDataBox.get(userKey).cashFlowLsit.add({
+      'cid': userDataBox.get(userKey).cashFlowLsit.length + 1,
+      'label': label,
+      'amount': amount,
+      'type': 'outflow',
+      'date': DateTime.now()
+    });
+    userDataBox.put(userKey, userDataBox.get(userKey));
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    // print(cashFlowBox);
-    double cashInflow = 0;
-    double cashOutflow = 0;
-    double endingCash = 0;
-    TextStyle headerStyle =
-        TextStyle(fontWeight: FontWeight.bold, fontSize: 20);
+    DateFormat dateFormat = DateFormat('MMMM dd, yyyy');
+    NumberFormat currencyFormat =
+        NumberFormat.currency(locale: 'en_PH', symbol: 'PHP ');
 
-    for (var item in inAmtConList) {
-      if (item.text.isNotEmpty) {
-        cashInflow += double.parse(item.text);
+    double begCash = 0;
+
+    changeDate() async {
+      var selectedDate = await showDatePicker(
+          context: context,
+          initialDate: date,
+          firstDate: DateTime(2021),
+          lastDate: DateTime.now());
+
+      if (selectedDate != null) {
+        setState(() {
+          date = selectedDate;
+        });
       }
     }
-    for (var item in outAmtConList) {
-      if (item.text.isNotEmpty) {
-        cashOutflow += double.parse(item.text);
+
+    // get beginning cash
+    var yesterdayCashFlow =
+        userDataBox.get(userKey).cashFlowLsit.where((element) {
+      DateTime curDate = DateTime(date.year, date.month, date.day);
+      DateTime eleDate = element['date'];
+
+      return eleDate.isBefore(curDate);
+    }).toList();
+
+    yesterdayCashFlow.forEach((element) {
+      if (element['type'] == 'sales' || element['type'] == 'inflow') {
+        begCash += element['amount'];
+      } else {
+        begCash -= element['amount'];
       }
-    }
-
-    if (beginningCashCon.text.isNotEmpty) {
-      endingCash =
-          double.parse(beginningCashCon.text) + cashInflow - cashOutflow;
-    } else {
-      endingCash = cashInflow - cashOutflow;
-    }
-
-    addInflow() {
-      TextEditingController amtCon = TextEditingController();
-      TextEditingController labCon = TextEditingController();
-      int index = inAmtConList.length;
-      setState(() {
-        inAmtConList.add(amtCon);
-        inLabConList.add(labCon);
-        inInput.add(buildInput(amtCon, 'Inflow', index, labCon));
-      });
-    }
-
-    addOutflow() {
-      TextEditingController amtCon = TextEditingController();
-      TextEditingController labCon = TextEditingController();
-      int index = outAmtConList.length;
-      setState(() {
-        outAmtConList.add(amtCon);
-        outLabConList.add(labCon);
-        outInput.add(buildInput(amtCon, 'Outflow', index, labCon));
-      });
-    }
-
-    saveCashFlow(DateTime date) {
-      cashFlowBox.add({
-        'beginningCash': double.parse(beginningCashCon.text),
-        'cashInflow': cashInflow,
-        'cashOutflow': cashOutflow,
-        'endingCash': endingCash,
-        'date': date,
-      });
-      userDataBox.put(userKey, userDataBox.get(userKey));
-    }
-
-    showConfirm() {
-      DateFormat formatter = DateFormat('MMM dd, yyyy HH:mm');
-      DateTime dateRaw = DateTime.now();
-      String date = formatter.format(dateRaw);
-
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            title: Text('Save Cash Flow?'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Are you sure you want to save this cash flow?'),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Date: ',
-                    ),
-                    SizedBox(width: 10),
-                    Text(date, style: TextStyle(fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Beginning Cash: ',
-                    ),
-                    SizedBox(width: 10),
-                    Text('PHP ${beginningCashCon.text}',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Cash Inflow: ',
-                    ),
-                    SizedBox(width: 10),
-                    Text('PHP ${cashInflow.toStringAsFixed(2)}',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Cash Outflow: ',
-                    ),
-                    SizedBox(width: 10),
-                    Text('PHP ${cashOutflow.toStringAsFixed(2)}',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                Divider(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Ending Cash: ',
-                    ),
-                    SizedBox(width: 10),
-                    Text('PHP ${endingCash.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        )),
-                  ],
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                  saveCashFlow(dateRaw);
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                },
-                child: Text('Save'),
-              ),
-            ],
-          );
-        },
-      );
-    }
+    });
 
     return Scaffold(
       appBar: Appbar(title: "Cash", leading: true),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
+      body: ValueListenableBuilder(
+          valueListenable: userDataBox.listenable(),
+          builder: (context, box, child) {
+            double totalInflow = 0;
+            double totalOutflow = 0;
+
+            var cashFlowList = box.get(userKey).cashFlowLsit.where((element) {
+              DateTime eleDate = element['date'];
+              return eleDate.year == date.year &&
+                  eleDate.month == date.month &&
+                  eleDate.day == date.day;
+            }).toList();
+
+            cashFlowList.forEach((element) {
+              // DateTime eleDate = element['date'];
+              if (element['type'] == 'inflow' || element['type'] == 'sales') {
+                totalInflow += element['amount'];
+              } else {
+                totalOutflow += element['amount'];
+              }
+            });
+
+            double endCash = begCash + totalInflow - totalOutflow;
+
+            return Column(
               children: [
+                // header
                 Container(
-                  padding: EdgeInsets.all(20),
+                  padding:
+                      EdgeInsets.only(right: 20, left: 20, top: 20, bottom: 5),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.shade400,
-                        spreadRadius: 1,
-                        blurRadius: 2,
-                      ),
-                    ],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Form(
-                        key: formKey,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      color: Colors.blueGrey[50],
+                      border: Border(
+                          bottom: BorderSide(color: Colors.grey.shade400))),
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      spacing: 10,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Row(
+                              children: [
+                                IconButton(
+                                    visualDensity: VisualDensity.compact,
+                                    onPressed: () {
+                                      setState(() {
+                                        date = date.subtract(Duration(days: 1));
+                                      });
+                                    },
+                                    icon: Icon(Icons.arrow_back_ios_rounded)),
+                                Text(dateFormat.format(date)),
+                                IconButton(
+                                    visualDensity: VisualDensity.compact,
+                                    onPressed: () {
+                                      setState(() {
+                                        if (DateTime.now().isAfter(
+                                            date.add(Duration(days: 1)))) {
+                                          date = date.add(Duration(days: 1));
+                                        }
+                                      });
+                                    },
+                                    icon: Icon(Icons.arrow_forward_ios_rounded))
+                              ],
+                            ),
+                            IconButton(
+                                visualDensity: VisualDensity.compact,
+                                onPressed: changeDate,
+                                icon: Icon(Icons.calendar_month_rounded))
+                          ],
+                        ),
+                        Divider(
+                          height: 0,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Column(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Beginning Cash',
+                                  style: TextStyle(
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  currencyFormat.format(begCash),
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      color: begCash < 0
+                                          ? Colors.red
+                                          : Colors.green),
+                                )
+                              ],
+                            ),
+                            Column(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Inflow',
+                                  style: TextStyle(
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  "+${currencyFormat.format(totalInflow)}",
+                                  style: TextStyle(
+                                      fontSize: 15, color: Colors.green),
+                                )
+                              ],
+                            ),
+                            Column(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Outflow',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  "-${currencyFormat.format(totalOutflow)}",
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.red,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                        Column(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Beginning Cash: ',
-                              style: headerStyle,
+                              'Ending Cash',
+                              style: TextStyle(
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.bold),
                             ),
-                            SizedBox(
-                              height: 50,
-                              width: 70,
-                              child: TextFormField(
-                                style: TextStyle(
-                                    fontSize: 17,
-                                    color: beginningCashCon.text.isEmpty
-                                        ? Colors.grey.shade200
-                                        : double.parse(beginningCashCon.text) >
-                                                0
-                                            ? Colors.green
-                                            : Colors.red,
-                                    fontWeight: FontWeight.bold),
-                                decoration: InputDecoration(hintText: 'amount'),
-                                textAlign: TextAlign.center,
-                                controller: beginningCashCon,
-                                keyboardType: TextInputType.number,
-                                onChanged: (val) {
-                                  setState(() {});
-                                },
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.allow(
-                                      RegExp(r'^\d+\.?\d{0,2}')),
-                                ],
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return '*required';
-                                  }
-                                  return null;
-                                },
+                            Text(
+                              currencyFormat.format(endCash),
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: endCash < 0 ? Colors.red : Colors.green,
                               ),
                             )
                           ],
                         ),
-                      ),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.info_outline_rounded,
-                            color: Colors.grey,
-                            size: 15,
-                          ),
-                          SizedBox(width: 10),
-                          SizedBox(
-                            width: 250,
-                            child: Text(
-                              'The initial Beginning Cash is the Ending Cash of the previous record.',
-                              style:
-                                  TextStyle(color: Colors.grey, fontSize: 11),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Divider(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Cash Inflow: ',
-                            style: headerStyle,
-                          ),
-                          Text(
-                            'PHP ${cashInflow.toStringAsFixed(2)}',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green,
-                                fontSize: 17),
-                          )
-                        ],
-                      ),
-                      SizedBox(
-                        height: inInput.length * 50.0,
-                        child: ListView.builder(
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: inInput.length,
-                          itemBuilder: (context, index) {
-                            return inInput[index];
-                          },
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: inInput.isNotEmpty
-                            ? MainAxisAlignment.spaceEvenly
-                            : MainAxisAlignment.center,
-                        children: [
-                          Button1(
-                            onpressed: addInflow,
-                            label: 'Add Item',
-                            icon: Icons.add,
-                            color: Colors.green,
-                          ),
-                          inInput.isNotEmpty
-                              ? Button1(
-                                  onpressed: () {
-                                    setState(() {
-                                      inAmtConList.removeLast();
-                                      inInput.removeLast();
-                                    });
-                                  },
-                                  label: 'Remove Item',
-                                  icon: Icons.delete_forever_rounded,
-                                  color: Colors.red,
-                                )
-                              : SizedBox(),
-                        ],
-                      ),
-                      Divider(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Cash Outflow: ', style: headerStyle),
-                          Text(
-                            'PHP ${cashOutflow.toStringAsFixed(2)}',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.red,
-                                fontSize: 17),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: outInput.length * 50.0,
-                        child: ListView.builder(
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: outInput.length,
-                          itemBuilder: (context, index) {
-                            return outInput[index];
-                          },
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: outInput.isNotEmpty
-                            ? MainAxisAlignment.spaceEvenly
-                            : MainAxisAlignment.center,
-                        children: [
-                          Button1(
-                            onpressed: addOutflow,
-                            label: 'Add Item',
-                            icon: Icons.add,
-                            color: Colors.green,
-                          ),
-                          outInput.isNotEmpty
-                              ? Button1(
-                                  onpressed: () {
-                                    setState(() {
-                                      outAmtConList.removeLast();
-                                      outInput.removeLast();
-                                    });
-                                  },
-                                  label: 'Remove Item',
-                                  icon: Icons.delete_forever_rounded,
-                                  color: Colors.red,
-                                )
-                              : SizedBox()
-                        ],
-                      ),
-                      Divider(
-                        thickness: 2,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Ending Cash: ', style: headerStyle),
-                          Text(
-                            'PHP ${endingCash.toStringAsFixed(2)}',
-                            style: TextStyle(
-                                color:
-                                    endingCash > 0 ? Colors.green : Colors.red,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 17),
-                          )
-                        ],
-                      ),
-                    ],
+                        RichText(
+                            text: TextSpan(
+                                style: TextStyle(
+                                    fontStyle: FontStyle.italic, fontSize: 10),
+                                children: [
+                              TextSpan(
+                                  text: 'note: ',
+                                  style: TextStyle(
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold)),
+                              TextSpan(
+                                  text:
+                                      'Total Sales and Purchase will be automatically added to Inflow and Outflow at the end of the day.',
+                                  style: TextStyle(color: Colors.grey))
+                            ]))
+                      ],
+                    ),
                   ),
                 ),
-                SizedBox(height: 20),
-                MaterialButton(
-                  height: 60,
-                  minWidth: double.infinity,
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      showConfirm();
-                    }
-                  },
-                  color: Colors.blueGrey,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Text(
-                    'Save',
-                    style: TextStyle(color: Colors.white, fontSize: 17),
+                // actual list
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: cashFlowList.length,
+                    itemBuilder: (context, index) {
+                      var item = cashFlowList[index];
+                      bool isOutflow = item['type'] == 'outflow' ||
+                              item['type'] == 'purchase'
+                          ? true
+                          : false;
+
+                      return Container(
+                        margin: EdgeInsets.only(right: 20, left: 20, top: 5),
+                        child: ListTile(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          tileColor: Colors.white,
+                          title: Text(item['label'],
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          trailing: Text(
+                              isOutflow
+                                  ? "-${currencyFormat.format(item['amount'])}"
+                                  : "+${currencyFormat.format(item['amount'])}",
+                              style: TextStyle(
+                                  fontSize: 13,
+                                  color:
+                                      isOutflow ? Colors.red : Colors.green)),
+                        ),
+                      );
+                    },
                   ),
                 ),
+                SizedBox(
+                  height: 70,
+                )
               ],
+            );
+          }),
+      bottomSheet: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          spacing: 10,
+          children: [
+            Expanded(
+              child: MaterialButton(
+                height: 50,
+                color: Colors.green,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                onPressed: addInflowDialog,
+                textColor: Colors.white,
+                child: Text(
+                  "Inflow",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
-          ),
+            Expanded(
+              child: MaterialButton(
+                height: 50,
+                color: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                onPressed: addOutFlowDialog,
+                textColor: Colors.white,
+                child: Text("Outflow",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            )
+          ],
         ),
       ),
     );

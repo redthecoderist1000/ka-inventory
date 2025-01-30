@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ka_inventory/components/appBar.dart';
 import 'package:ka_inventory/components/prepMerchTab.dart';
-import 'package:ka_inventory/hive/boxes.dart';
 import 'package:ka_inventory/pages/merchInvTab.dart';
 import 'package:ka_inventory/pages/prepInvTab.dart';
 
@@ -91,7 +90,7 @@ class _InventoryState extends State<Inventory> {
               Navigator.pushNamed(context, '/purchase_history');
             },
             child: Text(
-              'Puchase History',
+              'Purchase History',
               style: TextStyle(color: Colors.white, fontSize: 20),
             ),
           ),

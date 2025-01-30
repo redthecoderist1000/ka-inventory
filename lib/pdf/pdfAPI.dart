@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:ka_inventory/hive/boxes.dart';
 import 'package:open_file/open_file.dart';
@@ -16,10 +18,14 @@ class PdfAPI {
     final pdf = Document();
     var userData = userDataBox.get(userKey);
 
+    final imageLogo = (await rootBundle.load('assets/img/logoCropped.png'))
+        .buffer
+        .asUint8List();
+
     pdf.addPage(MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: EdgeInsets.all(.5 * PdfPageFormat.inch),
-        header: (context) => header('Sales Report'),
+        header: (context) => header('Sales Report', imageLogo),
         footer: (context) => footer(context),
         build: (context) => [
               Column(
@@ -59,11 +65,14 @@ class PdfAPI {
               )
             ]));
 
-    return saveDocument(name: 'ka_inventory_report.pdf', pdf: pdf);
+    return saveDocument(name: 'CB_Sales_Report.pdf', pdf: pdf);
   }
 
   static Future<File> purchaseHistoryPDF(List allList, double totalCost) async {
     final pdf = Document();
+    final imageLogo = (await rootBundle.load('assets/img/logoCropped.png'))
+        .buffer
+        .asUint8List();
     // var userData = userDataBox.get(userKey);
     DateFormat dateFormat = DateFormat("MMMM dd, yyyy");
     NumberFormat currencyFormat = NumberFormat.currency(
@@ -72,7 +81,7 @@ class PdfAPI {
     pdf.addPage(MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: EdgeInsets.all(.5 * PdfPageFormat.inch),
-        header: (context) => header('Inventory Report'),
+        header: (context) => header('Inventory Report', imageLogo),
         footer: (context) => footer(context),
         build: (context) => [
               Column(
@@ -111,7 +120,7 @@ class PdfAPI {
               )
             ]));
 
-    return saveDocument(name: 'ka_inventory_purchase_history.pdf', pdf: pdf);
+    return saveDocument(name: 'CB_Purchase_History.pdf', pdf: pdf);
   }
 
   static Future<File> saveDocument({
@@ -133,23 +142,16 @@ class PdfAPI {
     await OpenFile.open(file);
   }
 
-  static Widget header(String reportType) {
+  static Widget header(String reportType, Uint8List image) {
     DateFormat dateFormat = DateFormat("MMMM dd, yyyy hh:mm a");
 
     return Container(
         alignment: Alignment.centerLeft,
-        margin: EdgeInsets.only(bottom: .25 * PdfPageFormat.inch),
+        margin: EdgeInsets.only(bottom: .1 * PdfPageFormat.inch),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Ka-Inventory',
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24,
-                    color: PdfColors.blueGrey600)),
-            // Image(
-            //   MemoryImage(File('./../assets/img/logo.pdf').readAsBytesSync()),
-            // ),
+            Image(MemoryImage(image), height: 1 * PdfPageFormat.inch),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -424,7 +426,7 @@ class PdfAPI {
       ];
     }).toList();
 
-    const int firstPageRows = 16; // Adjust this value for the first page
+    const int firstPageRows = 15; // Adjust this value for the first page
     const int rowsPerPage = 20;
     List<Widget> pages = [];
 

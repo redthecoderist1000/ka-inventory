@@ -254,7 +254,7 @@ void main() async {
             transactionList: [
               {
                 "tid": 1,
-                "id": 1,
+                "id": '1',
                 "name": "Abodo",
                 "price": 30.0,
                 "quantity": 3,
@@ -264,7 +264,7 @@ void main() async {
               },
               {
                 "tid": 2,
-                "id": 4,
+                "id": '4',
                 "name": "Beef Tacos",
                 "price": 35.0,
                 "quantity": 3,
@@ -274,7 +274,7 @@ void main() async {
               },
               {
                 "tid": 3,
-                "id": 5,
+                "id": '5',
                 "name": "Vegetable Stir-fry",
                 "price": 20.0,
                 "quantity": 3,
@@ -284,7 +284,7 @@ void main() async {
               },
               {
                 "tid": 4,
-                "id": 8,
+                "id": '8',
                 "name": "Sushi Platter",
                 "price": 45.0,
                 "quantity": 3,
@@ -294,7 +294,7 @@ void main() async {
               },
               {
                 "tid": 5,
-                "id": 7,
+                "id": '7',
                 "name": "Pasta Alfredo",
                 "price": 28.0,
                 "quantity": 3,
@@ -304,7 +304,7 @@ void main() async {
               },
               {
                 "tid": 6,
-                "id": 10,
+                "id": '10',
                 "name": "Grilled Salmon",
                 "price": 50.0,
                 "quantity": 4,
@@ -314,7 +314,7 @@ void main() async {
               },
               {
                 "tid": 7,
-                "id": 1,
+                "id": '1',
                 "name": "Potato Chips",
                 "price": 20.0,
                 "quantity": 3,
@@ -324,7 +324,7 @@ void main() async {
               },
               {
                 "tid": 8,
-                "id": 4,
+                "id": '4',
                 "name": "Gummy Bears",
                 "price": 10.0,
                 "quantity": 3,
@@ -334,7 +334,7 @@ void main() async {
               },
               {
                 "tid": 9,
-                "id": 3,
+                "id": '3',
                 "name": "Energy Drink",
                 "price": 25.0,
                 "quantity": 4,
@@ -344,7 +344,7 @@ void main() async {
               },
               {
                 "tid": 10,
-                "id": 6,
+                "id": '6',
                 "name": "Soda",
                 "price": 5.0,
                 "quantity": 3,
@@ -354,7 +354,7 @@ void main() async {
               },
               {
                 "tid": 11,
-                "id": 7,
+                "id": '7',
                 "name": "Pretzels",
                 "price": 20.0,
                 "quantity": 3,
@@ -364,7 +364,7 @@ void main() async {
               },
               {
                 "tid": 12,
-                "id": 10,
+                "id": '10',
                 "name": "Candy Bar",
                 "price": 6.0,
                 "quantity": 3,
@@ -374,7 +374,7 @@ void main() async {
               },
               {
                 "tid": 13,
-                "id": 12,
+                "id": '12',
                 "name": "Trail Mix",
                 "price": 20.0,
                 "quantity": 4,
@@ -384,7 +384,7 @@ void main() async {
               },
               {
                 "tid": 14,
-                "id": 11,
+                "id": '11',
                 "name": "Iced Tea",
                 "price": 10.0,
                 "quantity": 1,
@@ -394,7 +394,7 @@ void main() async {
               },
               {
                 "tid": 15,
-                "id": 1,
+                "id": '1',
                 "name": "Abodo",
                 "price": 30.0,
                 "quantity": 4,
@@ -404,7 +404,7 @@ void main() async {
               },
               {
                 "tid": 16,
-                "id": 3,
+                "id": '3',
                 "name": "Chicken Adobo",
                 "price": 30.0,
                 "quantity": 2,
@@ -414,7 +414,7 @@ void main() async {
               },
               {
                 "tid": 17,
-                "id": 6,
+                "id": '6',
                 "name": "Soda",
                 "price": 5.0,
                 "quantity": 3,
@@ -424,26 +424,111 @@ void main() async {
               },
               {
                 "tid": 18,
-                "id": 10,
+                "id": '10',
                 "name": "Grilled Salmon",
                 "price": 50.0,
                 "quantity": 3,
                 "isMerch": false,
                 "cost": 3545.7,
-                "date": DateTime.parse("2025-01-27 20:00:50.442")
+                "date": DateTime.parse("2025-01-29 20:00:50.442")
               },
               {
                 "tid": 19,
-                "id": 11,
+                "id": '11',
                 "name": "Caesar Salad",
                 "price": 18.0,
                 "quantity": 4,
                 "isMerch": false,
                 "cost": 2750.4,
-                "date": DateTime.parse("2025-01-27 20:00:50.442")
+                "date": DateTime.parse("2025-01-29 20:00:50.442")
               }
             ],
-            cashFlowLsit: [],
+            cashFlowLsit: [
+              {
+                "cid": 1,
+                "label": "donation",
+                "amount": 350.0,
+                "type": "inflow",
+                "date": DateTime.parse("2025-01-28 00:40:15.972")
+              },
+              {
+                "cid": 2,
+                "label": "grocery",
+                "amount": 2600.0,
+                "type": "outflow",
+                "date": DateTime.parse("2025-01-28 00:42:35.744")
+              },
+              {
+                "cid": 3,
+                "label": "miscellaneous income",
+                "amount": 668.0,
+                "type": "inflow",
+                "date": DateTime.parse("2025-01-28 00:49:59.992")
+              },
+              {
+                "cid": 4,
+                "label": "other expenses",
+                "amount": 330.0,
+                "type": "outflow",
+                "date": DateTime.parse("2025-01-29 00:54:41.063")
+              },
+              {
+                "cid": 5,
+                "label": "subscription",
+                "amount": 44.0,
+                "type": "outflow",
+                "date": DateTime.parse("2025-01-29 00:54:46.093")
+              },
+              {
+                "cid": 6,
+                "label": "entertainment",
+                "amount": 77.0,
+                "type": "outflow",
+                "date": DateTime.parse("2025-01-29 00:54:49.673")
+              },
+              {
+                "cid": 7,
+                "label": "freelance payment",
+                "amount": 787.0,
+                "type": "inflow",
+                "date": DateTime.parse("2025-01-29 00:54:54.755")
+              },
+              {
+                "cid": 8,
+                "label": "bonus",
+                "amount": 777.0,
+                "type": "inflow",
+                "date": DateTime.parse("2025-01-30 00:54:57.804")
+              },
+              {
+                "cid": 9,
+                "label": "small refund",
+                "amount": 88.0,
+                "type": "inflow",
+                "date": DateTime.parse("2025-01-30 00:55:01.446")
+              },
+              {
+                "cid": 10,
+                "label": "reimbursement",
+                "amount": 777.0,
+                "type": "inflow",
+                "date": DateTime.parse("2025-01-30 00:55:06.025")
+              },
+              {
+                "cid": 11,
+                "label": "small expense",
+                "amount": 77.0,
+                "type": "outflow",
+                "date": DateTime.parse("2025-01-30 00:55:10.009")
+              },
+              {
+                "cid": 12,
+                "label": "tiny income",
+                "amount": 3.0,
+                "type": "inflow",
+                "date": DateTime.parse("2025-01-30 01:05:52.316")
+              }
+            ],
             isLogged: false,
             inventoryHistory: [
               {
@@ -643,8 +728,8 @@ void main() async {
                 "category": "Prepared Food",
                 "quantity": null,
                 "unitCost": null,
-                "totalCost": 3405.30,
-                "date": DateTime(2025, 1, 26, 08, 25, 30, 654)
+                "totalCost": 305.30,
+                "date": DateTime(2025, 1, 29, 08, 25, 30, 654)
               }
             ]));
   }
@@ -658,7 +743,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ka-inventory',
+      title: 'Canteen Buddy',
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
