@@ -369,21 +369,6 @@ class _CashState extends State<Cash> {
                             )
                           ],
                         ),
-                        RichText(
-                            text: TextSpan(
-                                style: TextStyle(
-                                    fontStyle: FontStyle.italic, fontSize: 10),
-                                children: [
-                              TextSpan(
-                                  text: 'note: ',
-                                  style: TextStyle(
-                                      color: Colors.grey,
-                                      fontWeight: FontWeight.bold)),
-                              TextSpan(
-                                  text:
-                                      'Total Sales and Purchase will be automatically added to Inflow and Outflow at the end of the day.',
-                                  style: TextStyle(color: Colors.grey))
-                            ]))
                       ],
                     ),
                   ),

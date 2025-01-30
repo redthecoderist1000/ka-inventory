@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:ka_inventory/components/appBar.dart';
 import 'package:ka_inventory/hive/boxes.dart';
 // import 'package:ka_inventory/hive/userData.dart';
@@ -126,6 +127,49 @@ class _Addinventory2State extends State<Addinventory2> {
       });
     }
 
+    addCashFlow(double amount) {
+      // update cashflow
+      var cashflowList = userDataBox.get(userKey).cashFlowLsit.where((element) {
+        return element['date'].toString().substring(0, 10) ==
+            DateTime.now().toString().substring(0, 10);
+      }).toList();
+
+      DateFormat dateFormat = DateFormat("MMM dd, yyyy");
+
+      if (cashflowList.isEmpty) {
+        // empty cashflow for today,, just add purchase
+        userDataBox.get(userKey).cashFlowLsit.add({
+          'cid': userDataBox.get(userKey).cashFlowLsit.length + 1,
+          'label': 'Purchase for ${dateFormat.format(DateTime.now())}',
+          'amount': amount,
+          'type': 'purchase',
+          'date': DateTime.now()
+        });
+      } else {
+        // cashflow for today exists
+        // check if purchase already exists
+        var purchase = cashflowList.firstWhere(
+            (element) => element['type'] == 'purchase',
+            orElse: () => null);
+
+        if (purchase == null) {
+          // purchase does not exist, just add purchase
+          userDataBox.get(userKey).cashFlowLsit.add({
+            'cid': userDataBox.get(userKey).cashFlowLsit.length + 1,
+            'label': 'Purchase for ${dateFormat.format(DateTime.now())}',
+            'amount': amount,
+            'type': 'purchase',
+            'date': DateTime.now()
+          });
+        } else {
+          // purchase exists
+          purchase['amount'] += amount;
+        }
+      }
+      // update hive
+      // userDataBox.put(userKey, userDataBox.get(userKey));
+    }
+
     submit() {
       // print('object');
 
@@ -143,7 +187,6 @@ class _Addinventory2State extends State<Addinventory2> {
 
       if (isExisting) {
         // existing item
-
         if (catValue == 'Prepared Food') {
           // prepared food
           double costToAdd = double.parse(costCon.text);
@@ -162,6 +205,7 @@ class _Addinventory2State extends State<Addinventory2> {
             'totalCost': costToAdd, //
             'date': DateTime.now(), //
           });
+          addCashFlow(costToAdd);
         } else {
           // merchandise
 
@@ -188,6 +232,7 @@ class _Addinventory2State extends State<Addinventory2> {
             'totalCost': costOriginal * quanToAdd,
             'date': DateTime.now(),
           });
+          addCashFlow(costOriginal * quanToAdd);
         }
       } else {
         // new item
@@ -223,6 +268,8 @@ class _Addinventory2State extends State<Addinventory2> {
             'totalCost': double.parse(costCon.text),
             'date': DateTime.now(),
           });
+
+          addCashFlow(double.parse(costCon.text));
         } else {
           // merchandise
           int lastIndex = userDataBox.get(userKey)!.merchList.length - 1;
@@ -255,6 +302,7 @@ class _Addinventory2State extends State<Addinventory2> {
             'totalCost': double.parse(costCon.text) * int.parse(quanCon.text),
             'date': DateTime.now(),
           });
+          addCashFlow(double.parse(costCon.text) * int.parse(quanCon.text));
         }
       }
 

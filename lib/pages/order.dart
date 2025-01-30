@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:ka_inventory/components/appBar.dart';
 import 'package:ka_inventory/components/orderTile.dart';
 import 'package:ka_inventory/hive/boxes.dart';
@@ -99,6 +100,7 @@ class OrderState extends State<Order> {
           behavior: SnackBarBehavior.floating,
         ));
       } else {
+        // success check out
         // update transatcionlist
 
         List orderList = box.get(userKey).orderList;
@@ -129,6 +131,52 @@ class OrderState extends State<Order> {
             box.get(userKey).prepList.firstWhere((element) =>
                     element['name'] == item['name'])['ordersFulfilled'] +=
                 item['quantity'];
+          }
+        }
+
+        // update cashflow
+        var cashflowList = box.get(userKey).cashFlowLsit.where((element) {
+          return element['date'].toString().substring(0, 10) ==
+              DateTime.now().toString().substring(0, 10);
+        }).toList();
+
+        DateFormat dateFormat = DateFormat("MMM dd, yyyy");
+
+        if (cashflowList.isEmpty) {
+          // empty cashflow, just add sales
+
+          box.get(userKey).cashFlowLsit.add({
+            'cid': box.get(userKey).cashFlowLsit.length + 1,
+            'label': 'Sales for ${dateFormat.format(DateTime.now())}',
+            'amount': orderList
+                .map((e) => e['price'] * e['quantity'])
+                .reduce((value, element) => value + element),
+            'type': 'sales',
+            'date': DateTime.now()
+          });
+        } else {
+          // cashflow already has items
+          // check if there is already a sales for today
+          var sales = cashflowList.firstWhere(
+              (element) => element['type'] == 'sales',
+              orElse: () => null);
+
+          if (sales != null) {
+            // update sales, cuz meron na
+            sales['amount'] += orderList
+                .map((e) => e['price'] * e['quantity'])
+                .reduce((value, element) => value + element);
+          } else {
+            // add sales
+            box.get(userKey).cashFlowLsit.add({
+              'cid': box.get(userKey).cashFlowLsit.length + 1,
+              'label': 'Sales for ${dateFormat.format(DateTime.now())}',
+              'amount': orderList
+                  .map((e) => e['price'] * e['quantity'])
+                  .reduce((value, element) => value + element),
+              'type': 'sales',
+              'date': DateTime.now()
+            });
           }
         }
 
